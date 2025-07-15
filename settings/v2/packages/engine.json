@@ -3,6 +3,7 @@
     "includeModules": [
       "2d",
       "3d",
+      "animation",
       "audio",
       "base",
       "dragon-bones",
@@ -16,13 +17,16 @@
       "physics-ammo",
       "primitive",
       "profiler",
+      "skeletal-animation",
       "spine",
       "terrain",
       "tiled-map",
       "tween",
       "ui",
       "video",
-      "webview"
+      "webview",
+      "legacy-pipeline"
     ]
-  }
+  },
+  "__version__": "1.0.12"
 }
