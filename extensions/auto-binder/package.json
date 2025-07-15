@@ -1,0 +1,65 @@
+{
+    "$schema": "./@types/schema/package/index.json",
+    "package_version": 2,
+    "name": "auto-binder",
+    "version": "1.0.0",
+    "author": "honmono",
+    "scripts": {
+        "preinstall": "node ./scripts/preinstall.js",
+        "build": "tsc",
+        "watch": "tsc -w"
+    },
+    "description": "i18n:auto-binder.description",
+    "main": "./dist/main.js",
+    "devDependencies": {
+        "@cocos/creator-types": "^3.8.6",
+        "@types/node": "^18.19.118",
+        "typescript": "^5.8.2"
+    },
+    "contributions": {
+        "menu": [
+            {
+                "path": "i18n:auto-binder",
+                "label": "i18n:auto-binder.bind-root",
+                "message": "bind-root"
+            },
+            {
+                "path": "i18n:auto-binder",
+                "label": "i18n:auto-binder.bind-node",
+                "message": "bind-node"
+            }
+        ],
+        "messages": {
+            "show-log": {
+                "methods": [
+                    "showLog"
+                ]
+            },
+            "bind-root": {
+                "methods": [
+                    "bindRoot"
+                ]
+            },
+            "bind-node": {
+                "methods": [
+                    "bindNode"
+                ]
+            }
+        },
+        "scene": {
+            "script": "./dist/scene.js"
+        },
+        "shortcuts": [
+            {
+                "message": "bind-root",
+                "win": "Alt+G",
+                "mac": "Alt+G"
+            },
+            {
+                "message": "bind-node",
+                "win": "Alt+N",
+                "mac": "Alt+N"
+            }
+        ]
+    }
+}
