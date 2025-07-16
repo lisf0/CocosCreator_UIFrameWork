@@ -1,12 +1,63 @@
 import * as cc from "cc";
 
-import UIManager from "./UIManager";
-import { FormType } from "./config/SysDefine";
-import { IFormData } from "./Struct";
 import AdapterMgr from "./AdapterMgr";
+import CocosHelper from "./CocosHelper";
+import { FormType } from "./config/SysDefine";
 import ResMgr from "./ResMgr";
+import { IFormData } from "./Struct";
+import UIManager from "./UIManager";
 
-export default class UIBase extends cc.Component {
+//@ts-ignore
+window["ab"] = {};
+
+/**
+ * 自动绑定组件的基类
+ */
+export class ABComponent extends cc.Component {
+    /** 是否已经调用过preinit方法 */
+    protected _inited = false;
+    public view: cc.Component | null = null;
+
+    /** 可以在这里进行一些资源的加载, 具体实现可以看test下的代码 */
+    public async load(params: any) {
+        return null;
+    }
+
+    protected getView() {
+        let coms = this.getComponents(cc.Component);
+        for (let index = 0; index < coms.length; index++) {
+            let name = CocosHelper.getComponentName(coms[index]);
+            if (name.endsWith("_Auto")) {
+                return coms[index];
+            }
+        }
+
+        return this.getComponent(`${this.node.name}_Auto`);
+    }
+
+    /** 预先初始化 */
+    public async _preInit(params: any) {
+        if (this._inited) return;
+        this._inited = true;
+        this.view = this.getView();
+        // 加载这个UI依赖的其他资源
+        let errorMsg = await this.load(params);
+        if (errorMsg) {
+            cc.error(errorMsg);
+            return false;
+        }
+        await this.onInit(params);
+        return true;
+    }
+
+    /** 初始化, 只调用一次 */
+    public async onInit(params: any) { }
+}
+
+//@ts-ignore
+window["ab"]["Component"] = ABComponent;
+
+export default class UIBase extends ABComponent {
     /** 窗体id,该窗体的唯一标示(请不要对这个值进行赋值操作, 内部已经实现了对应的赋值) */
     public fid: string = '';
     /** 窗体数据 */
@@ -16,63 +67,61 @@ export default class UIBase extends cc.Component {
     /** 关闭窗口后销毁, 会将其依赖的资源一并销毁, 采用了引用计数的管理, 不用担心会影响其他窗体 */
     public willDestory = false;
     /** 是否已经调用过preinit方法 */
-    private _inited = false;
+    // private _inited = false;
 
     public view: cc.Component | null = null;
 
     /** 预先初始化 */
     public async _preInit(params: any) {
-        if(this._inited) return ;
+        if (this._inited) return;
         this._inited = true;
-        this.view = this.getComponent(`${this.node.name}_Auto`);
+        this.view = this.getView();
         // 加载这个UI依赖的其他资源
         let errorMsg = await this.load(params);
-        if(errorMsg) {
+        if (errorMsg) {
             cc.error(errorMsg);
             this.closeSelf();
-            return ;
+            return false;
         }
         this.onInit(params);
+        return true;
     }
 
-    model: any = null; 
+    model: any = null;
 
     /** 可以在这里进行一些资源的加载, 具体实现可以看test下的代码 */
-    public async load(params: any): Promise<string> {
-        return '';
+    public async load(params: any) {
+        return null;
     }
-
-    /** 初始化, 只调用一次 */
-    public onInit(params: any) {}
     // 显示回调
-    public onShow(params: any) {}
+    public onShow(params: any) { }
     // 在显示动画结束后回调
-    public onAfterShow(params: any) {}
+    public onAfterShow(params: any) { }
     // 隐藏回调
-    public onHide() {}    
+    public onHide() { }
     // 在隐藏动画结束后回调
-    public onAfterHide() {}
+    public onAfterHide() { }
 
     // 关闭自己
     public async closeSelf(): Promise<boolean> {
-       return await UIManager.getInstance().closeForm(this.fid);
+        return await UIManager.getInstance().closeForm(this.fid);
     }
 
     /**
      * 弹窗动画
      */
-    public async showEffect() {}
-    public async hideEffect() {}
+    public async showEffect() { }
+    public async hideEffect() { }
 
     /** 设置是否挡住触摸事件 */
     private _blocker: cc.BlockInputEvents | null = null;
     public setBlockInput(block: boolean) {
-        if(!this._blocker)  {
+        if (!this._blocker) {
             let node = new cc.Node('block_input_events');
             this._blocker = node.addComponent(cc.BlockInputEvents);
             let trans = node.getComponent(cc.UITransform);
-            if(!trans) trans = node.addComponent(cc.UITransform);
-            if(AdapterMgr.inst.visibleSize) trans.setContentSize(AdapterMgr.inst.visibleSize);
+            if (!trans) trans = node.addComponent(cc.UITransform);
+            if (AdapterMgr.inst.visibleSize) trans.setContentSize(AdapterMgr.inst.visibleSize);
             this.node.insertChild(this._blocker.node, 9999);
         }
         this._blocker.node.active = block;
@@ -83,5 +132,5 @@ export default class UIBase extends cc.Component {
     }
 }
 
-//@ts-ignore
-cc.UIBase = UIBase;
+// @ts-ignore
+window["ab"]["UIBase"] = UIBase;

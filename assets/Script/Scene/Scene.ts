@@ -10,6 +10,7 @@ const {ccclass, property} = cc._decorator;
 @ccclass("Scene")
 export default class Scene extends cc.Component {
 
+    
     public static inst: Scene | null = null;
     private ndBlock: cc.Node | null = null;
     onLoad() {

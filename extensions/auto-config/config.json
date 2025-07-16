@@ -1,0 +1,9 @@
+[
+    {
+        "bundle": "resources",
+        "RootDir": "assets/resources",
+        "ScriptsDir": "assets/Script/UIScript",
+        "ScriptsName": "UIConfig.ts",
+        "FormsDir": "Forms"
+    }
+]

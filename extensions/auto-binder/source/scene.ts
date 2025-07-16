@@ -1,5 +1,4 @@
 import { Component, director, js, Node } from 'cc';
-import console from 'console';
 import fs from "fs";
 import path from 'path';
 import Const from "./Const";

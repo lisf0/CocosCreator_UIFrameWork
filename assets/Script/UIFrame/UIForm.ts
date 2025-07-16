@@ -13,25 +13,25 @@ export class UIScreen extends UIBase {
 
 
     public async closeSelf(): Promise<boolean> {
-        return await FormMgr.close({prefabUrl: this.fid, type: this.formType});
+        return await FormMgr.close({ prefabUrl: this.fid, type: this.formType });
     }
 }
 
 export class UIWindow extends UIBase {
-    formType = FormType.Window;    
+    formType = FormType.Window;
     modalType = new ModalType();                // 阴影类型
     willDestory = true;
 
     /** 显示效果 */
     public async showEffect() {
         this.node.setScale(cc.v3(0, 0));
-        
-        
-        await CocosHelper.runTweenSync(this.node, cc.tween().to(0.3, {scale: new cc.Vec3(1, 1)}, {}));
+
+
+        await CocosHelper.runTweenSync(this.node, cc.tween().to(0.3, { scale: new cc.Vec3(1, 1) }, {}));
     }
 
     public async closeSelf(): Promise<boolean> {
-        return await FormMgr.close({prefabUrl: this.fid, type: this.formType});
+        return await FormMgr.close({ prefabUrl: this.fid, type: this.formType });
     }
 
 }
@@ -41,16 +41,16 @@ export class UIFixed extends UIBase {
     willDestory = true;
 
     public async closeSelf(): Promise<boolean> {
-        return await FormMgr.close({prefabUrl: this.fid, type: this.formType});
+        return await FormMgr.close({ prefabUrl: this.fid, type: this.formType });
     }
-    
+
 }
 
 export class UITips extends UIBase {
     formType = FormType.Tips;
 
     public async closeSelf(): Promise<boolean> {
-        return await FormMgr.close({prefabUrl: this.fid, type: this.formType});
+        return await FormMgr.close({ prefabUrl: this.fid, type: this.formType });
     }
 }
 

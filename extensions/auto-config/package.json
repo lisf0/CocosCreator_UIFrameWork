@@ -1,7 +1,7 @@
 {
     "$schema": "./@types/schema/package/index.json",
     "package_version": 2,
-    "name": "auto-binder",
+    "name": "auto-config",
     "version": "1.0.0",
     "author": "honmono",
     "scripts": {
@@ -9,7 +9,7 @@
         "build": "tsc",
         "watch": "tsc -w"
     },
-    "description": "i18n:auto-binder.description",
+    "description": "i18n:auto-config.description",
     "main": "./dist/main.js",
     "devDependencies": {
         "@cocos/creator-types": "^3.8.6",
@@ -19,14 +19,9 @@
     "contributions": {
         "menu": [
             {
-                "path": "i18n:menu.extension/i18n:auto-binder",
-                "label": "i18n:auto-binder.bind-root",
-                "message": "bind-root"
-            },
-            {
-                "path": "i18n:menu.extension/i18n:auto-binder",
-                "label": "i18n:auto-binder.bind-node",
-                "message": "bind-node"
+                "path": "i18n:menu.extension/i18n:auto-config",
+                "label": "i18n:auto-config.generate",
+                "message": "generate"
             }
         ],
         "messages": {
@@ -35,14 +30,9 @@
                     "showLog"
                 ]
             },
-            "bind-root": {
+            "generate": {
                 "methods": [
-                    "bindRoot"
-                ]
-            },
-            "bind-node": {
-                "methods": [
-                    "bindNode"
+                    "generate"
                 ]
             }
         },
@@ -51,14 +41,9 @@
         },
         "shortcuts": [
             {
-                "message": "bind-root",
-                "win": "Alt+G",
-                "mac": "Alt+G"
-            },
-            {
-                "message": "bind-node",
-                "win": "Alt+N",
-                "mac": "Alt+N"
+                "message": "generate",
+                "win": "Alt+F",
+                "mac": "Alt+F"
             }
         ]
     }

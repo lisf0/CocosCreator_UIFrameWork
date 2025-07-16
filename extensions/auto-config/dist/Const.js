@@ -1,0 +1,7 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Const {
+}
+Const.ConfigUrl = "extensions/auto-config/config.json";
+exports.default = Const;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29uc3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zb3VyY2UvQ29uc3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSxNQUFxQixLQUFLOztBQUNoQixlQUFTLEdBQUcsb0NBQW9DLENBQUE7a0JBRHJDLEtBQUsiLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZGVmYXVsdCBjbGFzcyBDb25zdCB7XG4gICBzdGF0aWMgQ29uZmlnVXJsID0gXCJleHRlbnNpb25zL2F1dG8tY29uZmlnL2NvbmZpZy5qc29uXCJcbn1cbiJdfQ==
