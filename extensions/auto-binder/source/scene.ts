@@ -1,6 +1,7 @@
 import { Component, director, js, Node } from 'cc';
 import console from 'console';
 import fs from "fs";
+import path from 'path';
 import Const from "./Const";
 
 const ProjectPath = Editor.Project.path;
@@ -60,24 +61,29 @@ export const methods: { [key: string]: (...any: any) => any } = {
     async bind(NodeRoot: Node) {
 
         //@ts-ignore 
-        const com = NodeRoot.getComponent(ab.Component) || NodeRoot.getComponent(ab.UIBase);
+        const comp = NodeRoot.getComponent(ab.Component);
 
-        if (!com) {
-            console.warn(`${NodeRoot.name} 没有挂载 ABComponent / UIBase 脚本`);
+        if (!comp) {
+            console.warn(`${NodeRoot.name} 没有挂载 继承自ABComponent 脚本`);
             return;
         }
 
-
-        console.log(`正在读取配置文件: ${ProjectPath}/${Const.ConfigUrl} 请稍等.`);
-        let config = fs.readFileSync(`${ProjectPath}/${Const.ConfigUrl}`, { encoding: 'utf-8' });
-        if (!config) {
-            console.warn(`读取配置文件失败:${ProjectPath}/${Const.ConfigUrl}`);
-            return;
+        let configPath = path.join(ProjectPath, Const.ConfigUrl);
+        let config = Const.DefaultConfig;
+        if (fs.existsSync(configPath)) {
+            console.log(`正在读取配置文件: ${ProjectPath}/${Const.ConfigUrl} 请稍等.`);
+            let content = fs.readFileSync(`${ProjectPath}/${Const.ConfigUrl}`, { encoding: 'utf-8' });
+            if (!content) {
+                console.warn(`读取配置文件失败:${ProjectPath}/${Const.ConfigUrl}`);
+                return;
+            }
+            config = JSON.parse(content);
         }
 
 
         // @ts-ignore
-        let ComponentScriptPath = await Editor.Message.request('asset-db', 'query-path', com.__scriptUuid)
+        const scriptUuid = comp.__scriptUuid;
+        let ComponentScriptPath = await Editor.Message.request('asset-db', 'query-path', scriptUuid)
 
         console.log(ComponentScriptPath);
 
@@ -112,7 +118,6 @@ export const methods: { [key: string]: (...any: any) => any } = {
             return tempPath;
         }
 
-        config = JSON.parse(config);
         if (Array.isArray(config)) {
             for (let index = 0; index < config.length; index++) {
                 const element = config[index];
@@ -158,24 +163,18 @@ ${_str_content}
         try {
             await Editor.Message.request('asset-db', 'refresh-asset', dbScriptPath);
 
-            let comp = this.getComponent(NodeRoot, AutoScriptName);
-            if (!comp) {
+            let autoComp = this.getComponent(NodeRoot, AutoScriptName);
+            if (!autoComp) {
                 if (!js.getClassByName(AutoScriptName)) {
                     console.warn("请在执行一次run");
                     return;
                 };
                 await Editor.Message.request('scene', 'create-component', { uuid: NodeRoot.uuid, component: AutoScriptName });
-                // comp = this.getComponent(NodeRoot, AutoScriptName);
-                // comp = NodeRoot.addComponent(AutoScriptName);
+                // autoComp = this.getComponent(NodeRoot, AutoScriptName);  // ↑并不会实时附加上去
                 console.warn("请在执行一次run");
                 return;
             }
-            // const scene = director.getScene();
 
-            // if (scene == null) {
-            // console.warn("当前场景不存在!");
-            // return;
-            // }
             for (let key in nodeMaps) {
 
                 let options = {
@@ -190,10 +189,10 @@ ${_str_content}
                 }
 
                 if (options.dump.type != Const.SeparatorMap.Node) {
-                    let comp = this.getComponent(this.findNodeByUUID(nodeMaps[key][1], NodeRoot), options.dump.type);
-                    if (comp) {
+                    let appendComp = this.getComponent(this.findNodeByUUID(nodeMaps[key][1], NodeRoot), options.dump.type);
+                    if (appendComp) {
                         options.dump.value = {
-                            uuid: comp.uuid
+                            uuid: appendComp.uuid
                         };
                     }
                 }
@@ -257,7 +256,7 @@ ${_str_content}
     getUIComponentName(node: Node) {
 
         //@ts-ignore 
-        let coms = node.getComponents(ab.Component) || node.getComponents(ab.UIBase);
+        let coms = node.getComponents(ab.Component);
 
         for (let index = 0; index < coms.length; index++) {
             let name = this.getComponentName(coms[index]);
@@ -269,7 +268,8 @@ ${_str_content}
     },
 
     /**
-     * 调用 Editor.Message.request('asset-db', 'refresh-asset' 后 将无法通过cc的getComponent来获得组件
+     * 获取节点的组件
+     * 解决因调用 Editor.Message.request('asset-db', 'refresh-asset' 后 将无法通过cc的getComponent来获得组件
      */
     getComponent(node: Node, name: any) {
         let com = null;
