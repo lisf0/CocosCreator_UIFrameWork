@@ -142,18 +142,25 @@ export const methods: { [key: string]: (...any: any) => any } = {
         for (let key in importMaps) {
             _str_import += `import ${key} from "${this.getImportPath(importMaps[key], AutoScriptPath)}"\n`;
         }
+        let _cc_comps: string[] = [];
         let _str_content = ``;
         for (let key in nodeMaps) {
             let type = nodeMaps[key][0];
+            let arr = type.split(".");
+            if (arr[0] == "cc" && _cc_comps.indexOf(arr[1]) == -1) {
+                _cc_comps.push(arr[1]);
+                type = arr[1];
+            }
             _str_content += `\t@property(${type})\n\t${key}: ${type} | null = null;\n`;
         }
+        let _str_cc_comps = _cc_comps.length > 0 ? ', ' + _cc_comps.join(", ") : '';
 
-        let strScript = `
-${_str_import}
-import * as cc from 'cc';
-const { ccclass, property } = cc._decorator;
+        let strScript = `${_str_import}
+import { _decorator, Component${_str_cc_comps} } from 'cc';
+const { ccclass, property } = _decorator;
+
 @ccclass("${AutoScriptName}")
-export default class ${AutoScriptName} extends cc.Component {
+export default class ${AutoScriptName} extends Component {
 ${_str_content} 
 }`;
 
