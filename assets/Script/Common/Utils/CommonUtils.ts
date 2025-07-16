@@ -4,34 +4,34 @@ import CocosHelper from "../../UIFrame/CocosHelper";
 import { MathUtils } from "./MatchUtils";
 
 export interface TypeConstructor<T> {
-    new():T;
+    new(): T;
 }
 
 export interface IRandomGenerator {
-    nextInt(start:number, endAndNotIncluded:number) : number;
-    next01():number;
+    nextInt(start: number, endAndNotIncluded: number): number;
+    next01(): number;
 }
 
 let kDefaultRandomGenerator = {
-    nextInt(start:number, endAndNotIncluded:number) : number {
+    nextInt(start: number, endAndNotIncluded: number): number {
         return Math.floor(Math.random() * (endAndNotIncluded - start)) + start;
     },
-    next01() : number {
+    next01(): number {
         return Math.random();
     }
 };
 
 export class CommonUtils {
-    public static isArray(target:any) : boolean {
+    public static isArray(target: any): boolean {
         if (typeof Array.isArray === "function") {
             return Array.isArray(target);
-        }else{
+        } else {
             return Object.prototype.toString.call(target) === "[object Array]";
         }
     }
 
-    public static foramtDate(dateObj:Date, format:string) {
-        var date : any = {
+    public static foramtDate(dateObj: Date, format: string) {
+        var date: any = {
             "M+": dateObj.getMonth() + 1,
             "d+": dateObj.getDate(),
             "h+": dateObj.getHours(),
@@ -45,83 +45,83 @@ export class CommonUtils {
         }
         for (var k in date) {
             if (new RegExp("(" + k + ")").test(format)) {
-                    format = format.replace(RegExp.$1, ("00" + date[k]).substr(("" + date[k]).length));
+                format = format.replace(RegExp.$1, ("00" + date[k]).substr(("" + date[k]).length));
             }
         }
         return format;
     }
 
-    public static getElemClamped<T>(arr:T[], index:number) : T {
+    public static getElemClamped<T>(arr: T[], index: number): T {
         return arr[Math.max(0, Math.min(arr.length - 1, index))];
     }
 
-    public static randomIntClosedRange(min:number, max:number) : number {            //random integer in [min,max]
+    public static randomIntClosedRange(min: number, max: number): number {            //random integer in [min,max]
         return Math.floor(Math.random() * (max - min + 0.9999) + min);
     }
 
-    public static indexOf<T>(val:T, arr:T[]) : number {
-        for(let i = 0; i < arr.length; i++) {
-            if(arr[i] == val) {
+    public static indexOf<T>(val: T, arr: T[]): number {
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i] == val) {
                 return i;
             }
         }
         return -1;
     }
 
-    public static indexOfArr<T>(arr:T[], ...values:T[]) : number {
+    public static indexOfArr<T>(arr: T[], ...values: T[]): number {
         let paramCount = values.length;
         let found = false;
-        for(let i = 0; i <= arr.length - paramCount; i+=paramCount) {
+        for (let i = 0; i <= arr.length - paramCount; i += paramCount) {
             found = true;
-            for(let j = 0; j < paramCount; j++) {
-                if(arr[i + j] !== values[j]) {
+            for (let j = 0; j < paramCount; j++) {
+                if (arr[i + j] !== values[j]) {
                     found = false;
                     break;
                 }
             }
-            if(found) {
+            if (found) {
                 return i;
             }
         }
         return -1;
     }
 
-    public static floatEqual(left:number, right:number, epsilon:number = 0.000001) : boolean {
+    public static floatEqual(left: number, right: number, epsilon: number = 0.000001): boolean {
         return Math.abs(left - right) < epsilon;
     }
 
-    public static formatTimeInterval(seconds:number, alwaysShowMinutes:boolean = false, alwaysShowHours:boolean = false) {
+    public static formatTimeInterval(seconds: number, alwaysShowMinutes: boolean = false, alwaysShowHours: boolean = false) {
         alwaysShowMinutes = alwaysShowHours || alwaysShowMinutes;
         let ret = "";
         let hour = Math.floor(seconds / 3600);
         seconds = seconds % 3600;
         let minute = Math.floor(seconds / 60);
         seconds = Math.floor(seconds % 60);
-        if(alwaysShowHours || hour > 0) {
-            if(hour < 10) {
+        if (alwaysShowHours || hour > 0) {
+            if (hour < 10) {
                 ret += "0";
             }
             ret += hour + ":";
         }
-        if(alwaysShowMinutes || minute > 0 || hour > 0) {
-            if(minute < 10) {
+        if (alwaysShowMinutes || minute > 0 || hour > 0) {
+            if (minute < 10) {
                 ret += "0";
             }
             ret += minute + ":";
         }
-        if(seconds < 10) {
+        if (seconds < 10) {
             ret += "0";
         }
         ret += seconds;
         return ret;
     }
 
-    public static alignNumber(input:number, divider:number) : number {
+    public static alignNumber(input: number, divider: number): number {
         input = input - Math.floor(input / divider) * divider;
         return input;
     }
 
-    public static formatNumber(num:number) {
+    public static formatNumber(num: number) {
         var str = "" + Math.floor(num);
         var newStr = "";
         var count = 0;
@@ -153,20 +153,22 @@ export class CommonUtils {
         }
     }
 
-    public static updateLabelSize(label:cc.Label) {
-        label["_updateRenderData"](true);
+    public static updateLabelSize(label: cc.Label) {
+        if (label) {
+            label.updateRenderData(true);
+        }
     }
 
-    public static lerp(begin:number, end:number, factor:number) {
+    public static lerp(begin: number, end: number, factor: number) {
         return begin + (end - begin) * factor;
     }
 
-    public static shuffle(container:any[], randGenerator:IRandomGenerator = kDefaultRandomGenerator, start:number = 0, count:number = -1):void {
+    public static shuffle(container: any[], randGenerator: IRandomGenerator = kDefaultRandomGenerator, start: number = 0, count: number = -1): void {
         randGenerator = randGenerator || kDefaultRandomGenerator;
-        if(count < 0) {
+        if (count < 0) {
             count = container.length - start;
         }
-        for(let i = 0; i < count; i++) {
+        for (let i = 0; i < count; i++) {
             let idx = randGenerator.nextInt(start, start + count - i);
             let temp = container[idx];
             container[idx] = container[count - i - 1 + start];
@@ -174,46 +176,51 @@ export class CommonUtils {
         }
     }
 
-    public static setItemSpriteFrame(sprite:cc.Sprite, url:string, successCB:(sprite:cc.Sprite)=>void = null) {
+    public static setItemSpriteFrame(sprite: cc.Sprite, url: string, successCB?: (sprite: cc.Sprite) => void) {
+        if (sprite == null) {
+            return;
+        }
+        //@ts-ignore
         sprite["spriteFrameName"] = url;
-        CocosHelper.loadResSync(url, cc.SpriteFrame).then((spriteFrame:cc.SpriteFrame)=>{
-            if(sprite.isValid && sprite["spriteFrameName"] == url) {
+        CocosHelper.loadResSync<cc.SpriteFrame>(url, cc.SpriteFrame).then((spriteFrame: cc.SpriteFrame | null) => {
+            //@ts-ignore
+            if (sprite && sprite.isValid && sprite["spriteFrameName"] == url) {
                 sprite.spriteFrame = spriteFrame;
-                if(successCB) {
+                if (successCB) {
                     successCB(sprite);
                 }
             }
         });
     }
 
-    public static addSimpleClick(target:cc.Node, cb:()=>void) {
+    public static addSimpleClick(target: cc.Node, cb: () => void) {
         let targetNode = target;
-        let lastTouchPos : cc.Vec2 = null;
-        targetNode.on(cc.Node.EventType.TOUCH_START, (e: cc.EventTouch)=>{
+        let lastTouchPos: cc.Vec2 | null = null;
+        targetNode.on(cc.Node.EventType.TOUCH_START, (e: cc.EventTouch) => {
             lastTouchPos = e.getLocation();
         }, this);
-        targetNode.on(cc.Node.EventType.TOUCH_END, (e: cc.EventTouch)=>{
-            if(lastTouchPos) {
+        targetNode.on(cc.Node.EventType.TOUCH_END, (e: cc.EventTouch) => {
+            if (lastTouchPos) {
                 let delta = lastTouchPos.subtract(e.getLocation()).length();
-                if(delta < 3) {
+                if (delta < 3) {
                     cb();
                 }
             }
         }, this);
     }
 
-    public static isGoodNumber(num:any) {
+    public static isGoodNumber(num: any) {
         return (typeof num) === "number" && !Number.isNaN(num);
     }
 
     public static getVisibleRect() {
         let visibleRect = cc.view.getViewportRect();
-        visibleRect = cc.rect(visibleRect.origin.x / -cc.view.getScaleX(), visibleRect.origin.y / -cc.view.getScaleY(), 
-        (visibleRect.size.width + visibleRect.origin.x * 2) / cc.view.getScaleX(), (visibleRect.size.height + visibleRect.origin.y * 2) / cc.view.getScaleY());
+        visibleRect = cc.rect(visibleRect.origin.x / -cc.view.getScaleX(), visibleRect.origin.y / -cc.view.getScaleY(),
+            (visibleRect.size.width + visibleRect.origin.x * 2) / cc.view.getScaleX(), (visibleRect.size.height + visibleRect.origin.y * 2) / cc.view.getScaleY());
         return visibleRect;
     }
 
-    public static httpGet(url:string, cb: Function) {
+    public static httpGet(url: string, cb: Function) {
         let xhr = cc.loader.getXMLHttpRequest();
         xhr.onreadystatechange = function () {
             // cc.log("Get: readyState:" + xhr.readyState + " status:" + xhr.status);
@@ -222,7 +229,7 @@ export class CommonUtils {
                 let rsp = JSON.parse(respone);
                 cb(rsp);
             } else if (xhr.readyState === 4 && xhr.status == 401) {
-                cb({"ret":1});
+                cb({ "ret": 1 });
             } else {
                 //callback(-1);
             }
@@ -250,7 +257,7 @@ export class CommonUtils {
      * Box-Muller algorithm
      * @param avg 
      */
-    public static randomGaussian(avg:number, variant:number, randGenerator:IRandomGenerator = kDefaultRandomGenerator) : number {
+    public static randomGaussian(avg: number, variant: number, randGenerator: IRandomGenerator = kDefaultRandomGenerator): number {
         randGenerator = randGenerator || kDefaultRandomGenerator;
         let x1 = randGenerator.next01();
         let x2 = randGenerator.next01();
@@ -258,17 +265,17 @@ export class CommonUtils {
         return standard * variant + avg;
     }
 
-    public static deepCopy(dst:Object, src:Object) {
-        for(let field in src) {
+    public static deepCopy(dst: Object, src: Object) {
+        for (let field in src) {
             this._deepCopyFields(dst, src, field);
         }
     }
 
     public static constructObjectMap(obj: any): Map<string, any> {
         let map = new Map();
-        for(let key in obj) {
+        for (let key in obj) {
             let val = obj[key]
-            if(typeof val === "object") {
+            if (typeof val === "object") {
                 map.set(key, this.constructObjectMap(val));
             } else {
                 map.set(key, val);
@@ -277,20 +284,20 @@ export class CommonUtils {
         return map
     }
 
-    private static _deepCopyFields(dst:Object, src:Object, field:any) {
+    private static _deepCopyFields(dst: any, src: any, field: any) {
         let value = src[field];
-        if(typeof value == "number" || typeof value == "string") {
+        if (typeof value == "number" || typeof value == "string") {
             dst[field] = value;
-        } else if(this.isArray[value]) {
+        } else if (this.isArray(value)) {
             let dstArr = dst[field] = [];
-            for(let i = 0; i < value.length; i++) {
+            for (let i = 0; i < value.length; i++) {
                 this._deepCopyFields(dstArr, value, i);
             }
-        } else if(value == null) {
+        } else if (value == null) {
             dst[field] = null;
-        } else if(typeof value == "object") {
+        } else if (typeof value == "object") {
             let dstObj = new value.constructor();
-            for(let field in src) {
+            for (let field in src) {
                 this._deepCopyFields(dstObj, value, field);
             }
         }
@@ -396,13 +403,13 @@ export class CommonUtils {
     private static strlen(str: string) {
         let len = 0;
         for (let i = 0; i < str.length; i++) {
-          let c = str.charCodeAt(i);
-          //单字节加1 
-          if ((c >= 0x0001 && c <= 0x007e) || (0xff60 <= c && c <= 0xff9f)) {
-            len++;
-          } else {
-            len += 2;
-          }
+            let c = str.charCodeAt(i);
+            //单字节加1 
+            if ((c >= 0x0001 && c <= 0x007e) || (0xff60 <= c && c <= 0xff9f)) {
+                len++;
+            } else {
+                len += 2;
+            }
         }
         return len;
     }
@@ -415,32 +422,32 @@ export class CommonUtils {
             arr[b] = tmp;
         }
         let len = arr.length;
-        for(let i=0; i<len; i++) {
+        for (let i = 0; i < len; i++) {
             let idx = Math.floor(Math.random() * (len - i));
-            _swap(idx, len-i-1);
+            _swap(idx, len - i - 1);
         }
         return arr;
     }
-    
+
     /** 二分查找, findFlag 为false表示没找到的时候返回一个较小的, 为true返回一个较大的 */
     public static binarySearch(arr: number[], target: number, findFlag = false) {
-        let start = 0, end = arr.length-1;
-        while(end-start > 1){
+        let start = 0, end = arr.length - 1;
+        while (end - start > 1) {
             var idx = Math.floor((start + end) / 2);
             if (target < arr[idx]) {
                 end = idx;
             } else if (target > arr[idx]) {
-                   start = idx
+                start = idx
             } else {
                 return idx;
             }
         }
         // 没有找到对应的值
-        if(!findFlag) {
-            if(end == 0) return -1;
+        if (!findFlag) {
+            if (end == 0) return -1;
             return start;
-        }else {
-            if(start == arr.length-1) return arr.length;
+        } else {
+            if (start == arr.length - 1) return arr.length;
             return end;
         }
     }
@@ -449,7 +456,7 @@ export class CommonUtils {
     public static isInTriangle(point: cc.Vec2, triA: cc.Vec2, triB: cc.Vec2, triC: cc.Vec2) {
         let AB = triB.subtract(triA), AC = triC.subtract(triA), BC = triC.subtract(triB), AD = point.subtract(triA), BD = point.subtract(triB);
         //@ts-ignore
-        return (AB.cross(AC) >= 0 ^ AB.cross(AD) < 0)  && (AB.cross(AC) >= 0 ^ AC.cross(AD) >= 0) && (BC.cross(AB) > 0 ^ BC.cross(BD) >= 0); 
+        return (AB.cross(AC) >= 0 ^ AB.cross(AD) < 0) && (AB.cross(AC) >= 0 ^ AC.cross(AD) >= 0) && (BC.cross(AB) > 0 ^ BC.cross(BD) >= 0);
     }
 
     public static isInPolygon(checkPoint: cc.Vec2, polygonPoints: cc.Vec2[]) {
@@ -457,7 +464,7 @@ export class CommonUtils {
         let p1: cc.Vec2, p2: cc.Vec2;
         let pointCount = polygonPoints.length;
         p1 = polygonPoints[0];
-     
+
         for (i = 1; i <= pointCount; i++) {
             p2 = polygonPoints[i % pointCount];
             if (
@@ -480,9 +487,9 @@ export class CommonUtils {
 
     // 多边形 三角切割
     public static splitePolygon(points: cc.Vec2[]): number[] {
-        if(points.length <= 3) return [0, 1, 2];
-        let pointMap: {[key: string]: number} = {};     // point与idx的映射
-        for(let i=0; i<points.length; i++) {
+        if (points.length <= 3) return [0, 1, 2];
+        let pointMap: { [key: string]: number } = {};     // point与idx的映射
+        for (let i = 0; i < points.length; i++) {
             let p = points[i];
             pointMap[`${p.x}-${p.y}`] = i;
         }
@@ -493,26 +500,26 @@ export class CommonUtils {
         let idxs: number[] = [];
 
         let index = 0;
-        while(points.length > 3) {
+        while (points.length > 3) {
             let p1 = points[(index) % points.length]
-            , p2 = points[(index+1) % points.length]
-            , p3 = points[(index+2) % points.length];
-            let splitPoint = (index+1) % points.length;
+                , p2 = points[(index + 1) % points.length]
+                , p3 = points[(index + 2) % points.length];
+            let splitPoint = (index + 1) % points.length;
 
             let v1 = p2.subtract(p1);
             let v2 = p3.subtract(p2);
-            if(v1.cross(v2) < 0) {      // 是一个凹角, 寻找下一个
+            if (v1.cross(v2) < 0) {      // 是一个凹角, 寻找下一个
                 index = (index + 1) % points.length;
                 continue;
             }
-            let hasPoint = false;       
-            for(const p of points) {
-                if(p != p1 && p != p2 && p != p3 && this.isInTriangle(p, p1, p2 ,p3)) {
+            let hasPoint = false;
+            for (const p of points) {
+                if (p != p1 && p != p2 && p != p3 && this.isInTriangle(p, p1, p2, p3)) {
                     hasPoint = true;
                     break;
                 }
             }
-            if(hasPoint) {      // 当前三角形包含其他点, 寻找下一个
+            if (hasPoint) {      // 当前三角形包含其他点, 寻找下一个
                 index = (index + 1) % points.length;
                 continue;
             }
@@ -520,7 +527,7 @@ export class CommonUtils {
             idxs.push(getIdx(p1), getIdx(p2), getIdx(p3));
             points.splice(splitPoint, 1);
         }
-        for(const p of points) {
+        for (const p of points) {
             idxs.push(getIdx(p));
         }
         return idxs;
@@ -529,41 +536,47 @@ export class CommonUtils {
     /** 计算uv, 锚点都是中心 */
     public static computeUv(points: cc.Vec2[], width: number, height: number) {
         let uvs: cc.Vec2[] = [];
-        for(const p of points) {
+        for (const p of points) {
             // uv原点是左上角
-            let x = MathUtils.clamp(0, 1, (p.x + width/2) / width);
-            let y = MathUtils.clamp(0, 1, 1. - (p.y + height/2) / height);
+            let x = MathUtils.clamp(0, 1, (p.x + width / 2) / width);
+            let y = MathUtils.clamp(0, 1, 1. - (p.y + height / 2) / height);
             uvs.push(cc.v2(x, y));
         }
         return uvs;
     }
 
-    public static tweenFloat(from: number, to: number, duration: number, onUpdate: (t: number) => void, onComplete?: Function, autoStart: boolean = true) {
+    public static tweenFloat(from: number, to: number, duration: number, onUpdate: (t: number) => void, onComplete?: (target?: any, data?: any) => void, autoStart: boolean = true) {
         let o: Record<string, number> = { _value: from };
         Object.defineProperty(o, 'value', {
             get: () => o._value,
             set: (v: number) => { o._value = v; onUpdate && onUpdate(o._value); },
         });
-        let tween = cc.tween(o).to(duration, { value: to }).call(onComplete);
+        let tween = cc.tween(o).to(duration, { value: to });
+        if (onComplete) {
+            tween.call(onComplete);
+        }
         if (autoStart) {
             tween.start();
         }
         return tween;
     }
 
-    public static tweenVec2(from: cc.Vec2, to: cc.Vec2, duration: number, onUpdate: (t: cc.Vec2) => void, onComplete?: Function, autoStart: boolean = true) {
-        let o: Record<string, cc.Vec2> = {_value: from};
+    public static tweenVec2(from: cc.Vec2, to: cc.Vec2, duration: number, onUpdate: (t: cc.Vec2) => void, onComplete?: (target?: any, data?: any) => void, autoStart: boolean = true) {
+        let o: Record<string, cc.Vec2> = { _value: from };
         Object.defineProperty(o, 'value', {
             get: () => o._value,
             set: (v: cc.Vec2) => { o._value = v; onUpdate && onUpdate(o._value); },
         });
-        let tween = cc.tween(o).to(duration, { value: to }).call(onComplete);
+        let tween = cc.tween(o).to(duration, { value: to });
+        if (onComplete) {
+            tween.call(onComplete);
+        }
         if (autoStart) {
             tween.start();
         }
         return tween;
     }
 
-    
-    
+
+
 }

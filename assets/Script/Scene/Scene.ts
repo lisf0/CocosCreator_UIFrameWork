@@ -5,12 +5,12 @@ import AdapterMgr, { AdapterType } from "../UIFrame/AdapterMgr";
 import { EventCenter } from "../UIFrame/EventCenter";
 import { EventType } from "../UIFrame/EventType";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass("Scene")
 export default class Scene extends cc.Component {
 
-    
+
     public static inst: Scene | null = null;
     private ndBlock: cc.Node | null = null;
     onLoad() {
@@ -19,6 +19,8 @@ export default class Scene extends cc.Component {
 
     public initBlockNode() {
         this.ndBlock = new cc.Node("block");
+        let tran = this.ndBlock.addComponent(cc.UITransform);
+        tran.setContentSize(AdapterMgr.inst.visibleSize);
         this.ndBlock.addComponent(cc.BlockInputEvents);
         this.node.insertChild(this.ndBlock, 9999);
     }
@@ -66,11 +68,11 @@ export default class Scene extends cc.Component {
     /** 设置是否阻挡游戏触摸输入 */
     private _block = 0;
     public setInputBlock(bool: boolean) {
-        if(!this.ndBlock) {
+        if (!this.ndBlock) {
             cc.warn("未启用 block input");
-            return ;
+            return;
         }
-        bool ? ++ this._block : -- this._block;
+        bool ? ++this._block : --this._block;
         this.ndBlock.active = this._block > 0;
     }
 }

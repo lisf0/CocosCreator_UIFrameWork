@@ -1,16 +1,16 @@
 import * as cc from "cc";
 
 let flagOffset = 0;
-const _None = 1 << flagOffset ++;
-const _Left = 1 << flagOffset ++;            // 左对齐
-const _Right = 1 << flagOffset ++;           // 右对齐
-const _Top = 1 << flagOffset ++;             // 上对齐
-const _Bottom = 1 << flagOffset ++;          // 下对齐
+const _None = 1 << flagOffset++;
+const _Left = 1 << flagOffset++;            // 左对齐
+const _Right = 1 << flagOffset++;           // 右对齐
+const _Top = 1 << flagOffset++;             // 上对齐
+const _Bottom = 1 << flagOffset++;          // 下对齐
 const _StretchWidth = _Left | _Right;          // 拉伸宽
 const _StretchHeight = _Top | _Bottom;         // 拉伸高
 
-const _FullWidth = 1 << flagOffset ++;       // 等比充满宽
-const _FullHeight = 1 << flagOffset ++;      // 等比充满高
+const _FullWidth = 1 << flagOffset++;       // 等比充满宽
+const _FullHeight = 1 << flagOffset++;      // 等比充满高
 const _Final = 1 << flagOffset++;
 
 /**  */
@@ -27,23 +27,23 @@ export enum AdapterType {
     FullHeight = _FullHeight,
 }
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass("AdapterMgr")
 export default class AdapterMgr {
 
     private static _instance: AdapterMgr | null = null;                     // 单例
     public static get inst() {
-        if(this._instance == null) {
-            this._instance = new AdapterMgr();       
+        if (this._instance == null) {
+            this._instance = new AdapterMgr();
             this._instance.visibleSize = cc.view.getVisibleSize();
             console.log(`visiable size: ${this._instance.visibleSize}`);
         }
         return this._instance;
     }
-    
+
     /** 屏幕尺寸 */
-    public visibleSize: cc.Size | null = null;;
+    public visibleSize: cc.Size = cc.size();
 
     public adapteByType(flag: number, node: cc.Node, distance = 0) {
         let tFlag = _Final;
@@ -53,20 +53,20 @@ export default class AdapterMgr {
             tFlag = tFlag >> 1;
         }
         let widget = node.getComponent(cc.Widget);
-        if(!widget) widget = node.addComponent(cc.Widget);
+        if (!widget) widget = node.addComponent(cc.Widget);
         widget.target = cc.find("Canvas");
         widget.updateAlignment();
     }
 
     private _doAdapte(flag: number, node: cc.Node, distance: number = 0) {
-        if(!this.visibleSize) return ;
+        if (!this.visibleSize) return;
         let widget = node.getComponent(cc.Widget);
-        if(!widget) {
+        if (!widget) {
             widget = node.addComponent(cc.Widget);
         }
         let trans = node.getComponent(cc.UITransform);
-        if(!trans) trans = node.addComponent(cc.UITransform);
-        switch(flag) {
+        if (!trans) trans = node.addComponent(cc.UITransform);
+        switch (flag) {
             case _None:
                 break;
             case _Left:
@@ -108,7 +108,7 @@ export default class AdapterMgr {
 
     /** 移除 */
     removeAdaptater(node: cc.Node) {
-        if(node.getComponent(cc.Widget)) {
+        if (node.getComponent(cc.Widget)) {
             node.removeComponent(cc.Widget);
         }
     }

@@ -102,7 +102,7 @@ export default class PriorityQueue<T> {
         let s = '';
         for(let i=0; i<this._size; i++) {
             let data = this.queue[i].data;
-            if(data.toString) {
+            if(data?.toString) {
                 s += data.toString();
             }else {
                 s += typeof data === "object" ? JSON.stringify(data) : data;

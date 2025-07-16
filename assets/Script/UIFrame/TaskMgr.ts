@@ -18,13 +18,13 @@ export default class TaskMgr {
 
     private static _instance: TaskMgr | null = null;
     public static get inst() {
-        if(!this._instance) {
+        if (!this._instance) {
             this._instance = new TaskMgr();
         }
         return this._instance;
     }
 
-    private _cmdMap: {[key:string]: PriorityQueue<Command>} = cc.js.createMap(); 
+    private _cmdMap: { [key: string]: PriorityQueue<Command> } = cc.js.createMap();
     private _debugHistory: Array<Command> = [];
 
     private _debug = false;
@@ -37,11 +37,11 @@ export default class TaskMgr {
      * @param pIdx 优先级 数值越大优先级越高  默认是0
      */
     public pushCommand(key: string, command: Command, pIdx: number = 0) {
-        if(this._debug) {
+        if (this._debug) {
             this._debugHistory.push(command);
         }
         let cmdQueue = this._cmdMap[key];
-        if(!cmdQueue) {
+        if (!cmdQueue) {
             cmdQueue = this._cmdMap[key] = new PriorityQueue<Command>();
         }
         cmdQueue.enqueue(command, pIdx);
@@ -50,18 +50,18 @@ export default class TaskMgr {
     /** 获得一个命令 */
     public popCommand(key: string) {
         let cmdQueue = this._cmdMap[key];
-        if(!cmdQueue) return null;
+        if (!cmdQueue) return null;
         return cmdQueue.dequeue();
     }
 
     /** 是否有这个命令 */
     public hasCommand(ele: Command, key?: string) {
-        if(key) {
+        if (key) {
             let cmdQueue = this._cmdMap[key];
             return cmdQueue.hasElement(ele);
         }
-        for(let key in this._cmdMap) {
-            if(this._cmdMap[key].hasElement(ele)) return true;
+        for (let key in this._cmdMap) {
+            if (this._cmdMap[key].hasElement(ele)) return true;
         }
         return false;
     }

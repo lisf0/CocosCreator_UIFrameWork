@@ -1,4 +1,4 @@
-export const enum RountType{
+export const enum RountType {
     Round,
     Floor,
     Ceil,
@@ -35,7 +35,7 @@ export default class BigNumUtils {
                 value[0] += base / Math.pow(10, value[1] - zeroes);
             }
         }
-        let sign = value[0] >= 0 ? 1 : -1; 
+        let sign = value[0] >= 0 ? 1 : -1;
         let rbase = Math.abs(value[0]);
         while (rbase < 1 && value[1] > 0) {
             rbase *= 10;
@@ -48,7 +48,7 @@ export default class BigNumUtils {
         rbase *= sign;
         return `${rbase}e${value[1]}`;
     }
-    public static BNMinus(...args: any[]):BigNumber {
+    public static BNMinus(...args: any[]): BigNumber {
         var value = [0, 0];
         for (var _i = 0; _i < args.length; _i++) {
             var arg = args[_i];
@@ -82,7 +82,7 @@ export default class BigNumUtils {
         // if(value[0] <= 1e-10){
         //   return 0;
         // }
-        let sign = value[0] >= 0 ? 1 : -1; 
+        let sign = value[0] >= 0 ? 1 : -1;
         let rbase = Math.abs(value[0]);
         while (rbase < 1 && value[1] > 0) {
             rbase *= 10;
@@ -128,8 +128,8 @@ export default class BigNumUtils {
                 }
             }
         });
-        
-        let sign = value[0] >= 0 ? 1 : -1; 
+
+        let sign = value[0] >= 0 ? 1 : -1;
         let base = Math.abs(value[0]);
         while (base < 1 && value[1] > 0) {
             base *= 10;
@@ -146,7 +146,7 @@ export default class BigNumUtils {
             return 0;
         }
         var value = [0, 0];
-        let sign:number = 1;
+        let sign: number = 1;
         [value0, value1].forEach(function (arg, idx) {
             var base, zeroes;
             let realNum = +arg;
@@ -154,12 +154,11 @@ export default class BigNumUtils {
             if (num === 0 || (num && num !== Infinity)) {
                 zeroes = num < 10 ? 0 : Math.floor(Math.log10(num) + 1e-6);
                 base = num < 10 ? num : num / Math.pow(10, zeroes);
-            }
-            else {
-                arg = arg.split("e");
-                realNum = +arg[0];
+            } else {
+                let targ = arg.toString().split("e");
+                realNum = +targ[0];
                 base = Math.abs(realNum);
-                zeroes = +arg[1];
+                zeroes = +targ[1];
             }
 
             sign *= realNum >= 0 ? 1 : -1;
@@ -187,7 +186,7 @@ export default class BigNumUtils {
         }
         return this.BNTimes(base, this.BNPow(10, value[1]));
     }
-    public static BNCompare(value0, value1) {
+    public static BNCompare(value0: number, value1: number) {
         var bases = [0, 0];
         var zeroes = [0, 0];
         [value0, value1].forEach(function (arg, idx) {
@@ -197,14 +196,14 @@ export default class BigNumUtils {
                 bases[idx] = arg < 10 ? arg : arg / Math.pow(10, zeroes[idx]);
             }
             else {
-                arg = arg.split("e");
-                bases[idx] = +arg[0];
-                zeroes[idx] = +arg[1];
+                let targ = arg.toString().split("e");
+                bases[idx] = +targ[0];
+                zeroes[idx] = +targ[1];
             }
         });
         return bases[0] * bases[1] < 0 ? (bases[0] > 0 ? 1 : -1) : zeroes[1] > zeroes[0] ? -1 : zeroes[1] < zeroes[0] ? 1 : bases[1] > bases[0] ? -1 : bases[1] < bases[0] ? 1 : 0;
     }
-    public static BNPow(di, zhi) {
+    public static BNPow(di: number, zhi: number) {
         if (!di) {
             return "0";
         }
@@ -213,7 +212,7 @@ export default class BigNumUtils {
         }
         var max = Math.floor(Math.log(1e300) / Math.log(di));
         max = Math.max(max, 1);
-        var val:BigNumber = 1;
+        var val: BigNumber = 1;
         if (max >= zhi) {
             val = Math.pow(di, zhi);
         } else {
@@ -228,45 +227,45 @@ export default class BigNumUtils {
         }
         return val;
     }
-    public static BNMax(value0, value1) {
+    public static BNMax(value0: number, value1: number) {
         return this.BNCompare(value0, value1) > 0 ? value0 : value1;
     }
-    public static BNMin(value0, value1) {
+    public static BNMin(value0: number, value1: number) {
         return this.BNCompare(value0, value1) > 0 ? value1 : value0;
     }
-    public static BNLog(value) {
+    public static BNLog(value: number) {
         let num = +value;
         if (num === 0 || (num && num !== Infinity)) {
             const sign = num >= 0 ? 1 : -1;
             num = Math.abs(num);
             return sign * Math.log10(num);
         } else {
-            return +value.split("e")[1];
+            return +value.toString().split("e")[1];
         }
     }
-    public static BNSqrt(value){
+    public static BNSqrt(value: number) {
         const num = +value;
         if (num === 0 || (num && num !== Infinity)) {
             return Math.sqrt(num);
         }
-        var arr = value.split("e");
+        var arr = value.toString().split("e");
         let a = +arr[0];
         let b = +arr[1];
-        return `${Math.sqrt(a)}e${b/2}`;
+        return `${Math.sqrt(a)}e${b / 2}`;
     }
 
-    public static BNSqrtEx(value, zhi:number){
+    public static BNSqrtEx(value: number, zhi: number) {
         const num = +value;
         if (num === 0 || (num && num !== Infinity)) {
-            return Math.pow(num, 1/zhi);
+            return Math.pow(num, 1 / zhi);
         }
-        var arr = value.split("e");
+        var arr = value.toString().split("e");
         let a = +arr[0];
         let b = +arr[1];
-        return `${Math.pow(a, 1/zhi)}e${b/zhi}`;
+        return `${Math.pow(a, 1 / zhi)}e${b / zhi}`;
     }
 
-    public static BNFloor(value){
+    public static BNFloor(value: number) {
         const num = +value;
         if (num === 0 || (num && num !== Infinity)) {
             return Math.floor(num);
@@ -274,7 +273,7 @@ export default class BigNumUtils {
         return value;
     }
 
-    public static BNCeil(value){
+    public static BNCeil(value: number) {
         const num = +value;
         if (num === 0 || (num && num !== Infinity)) {
             return Math.ceil(num);
@@ -282,7 +281,7 @@ export default class BigNumUtils {
         return value;
     }
 
-    public static BNRound(value){
+    public static BNRound(value: number) {
         const num = +value;
         if (num === 0 || (num && num !== Infinity)) {
             return Math.round(num);
@@ -290,70 +289,70 @@ export default class BigNumUtils {
         return value;
     }
 
-    public static BN2Number(value) {
+    public static BN2Number(value: number) {
         const num = +value;
         if (num === 0 || (num && num !== Infinity)) {
             return num;
         } else {
-            var arr = value.split("e");
-            return +arr[0] * Math.pow(10, arr[1]);
+            var arr = value.toString().split("e");
+            return +arr[0] * Math.pow(10, Number(arr[1]));
         }
     }
 
-    public static getOwnString(n:any){
+    public static getOwnString(n: any) {
         return this.getNumberString(n, undefined, undefined, RountType.Floor);
     }
 
-    public static getCostString(n:any){
+    public static getCostString(n: any) {
         return this.getNumberString(n, undefined, undefined, RountType.Ceil);
     }
 
-    public static getNumberString(n:any, fixed:number = 0, bigFixed?:number, roundType = RountType.Round):string{
-        let _base:number;
+    public static getNumberString(n: any, fixed: number = 0, bigFixed?: number, roundType = RountType.Round): string {
+        let _base: number;
         let tailIdx;
         const num = +n;
         if (num === 0 || (num && num !== Infinity)) {
-            if(n < 1000){
+            if (n < 1000) {
                 return this.roundNum(n, roundType, fixed);
             }
-            let base:string = `${Math.round(n)}`;
-            let digit:number = 0;
-            if(~base.indexOf("e")){
+            let base: string = `${Math.round(n)}`;
+            let digit: number = 0;
+            if (~base.indexOf("e")) {
                 //fix bug Math.log10(9.999999999999996e+38)=39
-                let dishu:number = +base.split("e")[0];
-                let zhishu:number = +base.split("e")[1];
+                let dishu: number = +base.split("e")[0];
+                let zhishu: number = +base.split("e")[1];
                 zhishu += Math.floor(Math.log10(dishu));
                 digit = zhishu;
             } else {
                 digit = Math.floor(Math.log10(n));
             }
-            
-            if(~base.indexOf("e")){
-                _base = +base.split("e")[0] * Math.pow(10,digit % 3);
+
+            if (~base.indexOf("e")) {
+                _base = +base.split("e")[0] * Math.pow(10, digit % 3);
             }
-            else{
+            else {
                 _base = +base.slice(0, digit % 3 + 4) / 1000;
             }
             tailIdx = digit / 3 >> 0;
         }
-        else{
+        else {
             n = n.split("e");
-            if(+n[1] < 3){
-                let v = n[0] * Math.pow(10,n[1]);
+            if (+n[1] < 3) {
+                let v = n[0] * Math.pow(10, n[1]);
                 return this.roundNum(v, roundType, fixed);
             }
-            _base = n[0] * Math.pow(10,n[1] % 3);
-            while(_base > 1000){
+            _base = n[0] * Math.pow(10, n[1] % 3);
+            while (_base > 1000) {
                 _base /= 1000;
                 n[1] = +n[1] + 3;
             }
             tailIdx = n[1] / 3 >> 0;
         }
         var tail;
-        if(tailIdx < 4){
-            tail = ["","K","M","B"][tailIdx];
+        if (tailIdx < 4) {
+            tail = ["", "K", "M", "B"][tailIdx];
         }
-        else{
+        else {
             var first = (tailIdx - 4) / 26 >> 0;
 
             var grade = first / 26 >> 0;
@@ -365,24 +364,24 @@ export default class BigNumUtils {
             tail = (grade < 2 ? a : b)[first % 26] + (grade % 2 ? b : a)[second];
         }
 
-        if(bigFixed === undefined){
+        if (bigFixed === undefined) {
             bigFixed = _base < 10 ? 2 : _base < 100 ? 1 : 0
         }
         const baseStr = this.roundNum(_base, roundType, bigFixed);
         return baseStr + tail;
     }
 
-    private static roundNum(n:number, type:RountType, fixed:number){
+    private static roundNum(n: number, type: RountType, fixed: number) {
         let func;
-        if(type === RountType.Round){
+        if (type === RountType.Round) {
             func = Math.round;
-        } else if(type === RountType.Ceil){
+        } else if (type === RountType.Ceil) {
             func = Math.ceil;
         } else {
             func = Math.floor;
         }
-        let val:number;
-        if(fixed === 0){
+        let val: number;
+        if (fixed === 0) {
             val = func(n);
         } else {
             const b = Math.pow(10, fixed);
@@ -391,13 +390,13 @@ export default class BigNumUtils {
         return val.toFixed(fixed);
     }
 
-    public static getFixNumber(num:number, fixed:number = 1) {
+    public static getFixNumber(num: number, fixed: number = 1) {
         const b = Math.pow(10, fixed)
         return Math.floor(num * b) / b;
     }
 
-    public static getPercentString(num:BigNumber, fixed:number = 1){
-        if(typeof num === 'string'){
+    public static getPercentString(num: BigNumber, fixed: number = 1) {
+        if (typeof num === 'string') {
             return this.getNumberString(this.BNTimes(num, 100), fixed) + '%';
         } else {
             return this.getNumberString(num * 100, fixed) + '%';

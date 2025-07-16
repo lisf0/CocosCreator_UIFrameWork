@@ -3,18 +3,18 @@ import * as cc from "cc";
 import CocosHelper from "./CocosHelper";
 import { SysDefine } from "./config/SysDefine";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class SoundMgr extends cc.Component {
 
-    private audioCache: {[key: string]: cc.AudioClip} = cc.js.createMap();
+    private audioCache: { [key: string]: cc.AudioClip } = cc.js.createMap();
 
     private static _inst: SoundMgr | null = null;                     // 单例
     public static get inst(): SoundMgr | null {
-        if(this._inst == null) {
+        if (this._inst == null) {
             let root = cc.find(SysDefine.SYS_UIROOT_NAME);
-            if(!root) return null;
+            if (!root) return null;
             this._inst = root.addComponent<SoundMgr>(this);
         }
         return this._inst;
@@ -23,11 +23,11 @@ export default class SoundMgr extends cc.Component {
     private currEffectId: number = -1;
     private currMusicId: number = -1;
 
-    onLoad () {
+    onLoad() {
         let volume = this.getVolumeToLocal();
-        if(volume) {
+        if (volume) {
             this.volume = volume;
-        }else {
+        } else {
             this.volume.musicVolume = 1;
             this.volume.effectVolume = 1;
         }
@@ -35,7 +35,6 @@ export default class SoundMgr extends cc.Component {
 
         cc.game.on(cc.Game.EVENT_HIDE, () => {
             //cc.audioEngine.pauseAll();
-            cc
         }, this);
         cc.game.on(cc.Game.EVENT_SHOW, () => {
             //cc.audioEngine.resumeAll();
@@ -47,7 +46,7 @@ export default class SoundMgr extends cc.Component {
         return this.volume;
     }
 
-    start () {
+    start() {
 
     }
     /**  */
@@ -61,33 +60,33 @@ export default class SoundMgr extends cc.Component {
     }
     /** 播放背景音乐 */
     public async playMusic(url: string, loop = true) {
-        if(!url || url === '') return ;
-        
-        if(this.audioCache[url]) {
+        if (!url || url === '') return;
+
+        if (this.audioCache[url]) {
             //cc.audioEngine.playMusic(this.audioCache[url], loop);
-            return ;
+            return;
         }
         let sound = await CocosHelper.loadResSync<cc.AudioClip>(url, cc.AudioClip);
-        if(sound) this.audioCache[url] = sound;
+        if (sound) this.audioCache[url] = sound;
         //this.currMusicId = cc.audioEngine.playMusic(sound, loop);
     }
     /** 播放音效 */
     public async playEffect(url: string, loop = false) {
-        if(!url || url === '') return ;
-        
-        if(this.audioCache[url]) {
+        if (!url || url === '') return;
+
+        if (this.audioCache[url]) {
             //cc.audioEngine.playEffect(this.audioCache[url], loop);
-            return ;
+            return;
         }
         let sound = await CocosHelper.loadResSync<cc.AudioClip>(url, cc.AudioClip);
-        if(sound) this.audioCache[url] = sound;
+        if (sound) this.audioCache[url] = sound;
         //this.currEffectId = cc.audioEngine.playEffect(sound, loop);
     }
 
     /** 从本地读取 */
     private getVolumeToLocal() {
         let objStr = cc.sys.localStorage.getItem("Volume_For_Creator");
-        if(!objStr) {
+        if (!objStr) {
             return null;
         }
         return JSON.parse(objStr);
@@ -101,9 +100,9 @@ export default class SoundMgr extends cc.Component {
     }
 
     public setEffectActive(active: boolean, id: number = -1) {
-        if(active) {
+        if (active) {
             //cc.audioEngine.stop(id < 0 ? this.currEffectId : id);
-        }else {
+        } else {
             //cc.audioEngine.resume(id < 0 ? this.currEffectId : id); 
         }
     }

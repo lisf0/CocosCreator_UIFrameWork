@@ -5,5 +5,10 @@ export default class UIConfig {
         prefabUrl: "Forms/UIHome",
         type: "UIScreen"
     }
+    static UITestWin = {
+        bundleName:"resources",
+        prefabUrl: "Forms/UITestWin",
+        type: "UIWindow"
+    }
     
 }

@@ -114,6 +114,7 @@ export default class CocosHelper {
             for (const func of arr) {
                 func(data);
             }
+            this._loadingMap[url] = [];
             delete this._loadingMap[url];
         });
     }
@@ -169,7 +170,7 @@ export default class CocosHelper {
     public static loadBundleSync(url: string, options: any): Promise<cc.AssetManager.Bundle | null> {
         return new Promise((resolve, reject) => {
             cc.assetManager.loadBundle(url, options, (err: Error | null, bundle: cc.AssetManager.Bundle) => {
-                if (!err) {
+                if (err) {
                     cc.error(`加载bundle失败, url: ${url}, err:${err}`);
                     resolve(null);
                 } else {
@@ -182,11 +183,11 @@ export default class CocosHelper {
     /** 路径是相对分包文件夹路径的相对路径 */
     public static loadAssetFromBundleSync(bundleName: string, url: string) {
         let bundle = cc.assetManager.getBundle(bundleName);
+        if (!bundle) {
+            cc.error(`加载bundle中的资源失败, 未找到bundle, bundleUrl:${bundleName}`);
+            return null;
+        }
         return new Promise((resolve, reject) => {
-            if (!bundle) {
-                cc.error(`加载bundle中的资源失败, 未找到bundle, bundleUrl:${bundleName}`);
-                return null;
-            }
             bundle.load(url, (err, asset: cc.Asset | cc.Asset[]) => {
                 if (err) {
                     cc.error(`加载bundle中的资源失败, 未找到asset, url:${url}, err:${err}`);
