@@ -1,6 +1,7 @@
 import { Component, director, js, Node } from 'cc';
 import fs from "fs";
 import path from 'path';
+import packageJSON from '../package.json';
 import Const from "./Const";
 
 const ProjectPath = Editor.Project.path;
@@ -93,8 +94,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
         ComponentScriptPath = ComponentScriptPath.replace(/\\/g, "/");
 
         // let ProjectDir = Editor.Project.path;
-        let UIComName = this.getUIComponentName(NodeRoot);
-
+        let UIComName = this.getABComponentName(NodeRoot);
         let AutoScriptName = `${UIComName}_Auto`;
         let AutoScriptPath = ``;
 
@@ -171,13 +171,14 @@ ${_str_content}
 
             let autoComp = this.getComponent(NodeRoot, AutoScriptName);
             if (!autoComp) {
+                const shortcuts = packageJSON.contributions.shortcuts.map(v => v.win).join(' / ');
                 if (!js.getClassByName(AutoScriptName)) {
-                    console.warn("请在执行一次run");
+                    console.info(`请再执行一次 ${shortcuts}`);
                     return;
-                };
+                }
                 await Editor.Message.request('scene', 'create-component', { uuid: NodeRoot.uuid, component: AutoScriptName });
                 // autoComp = this.getComponent(NodeRoot, AutoScriptName);  // ↑并不会实时附加上去
-                console.warn("请在执行一次run");
+                console.info(`请再执行一次 ${shortcuts}`);
                 return;
             }
 
@@ -259,17 +260,29 @@ ${_str_content}
         return com.name;
     },
 
-    getUIComponentName(node: Node) {
+    getABComponentName(node: Node) {
 
         //@ts-ignore 
         let coms = node.getComponents(ab.Component);
 
+        // 优先取UI开头的组件
         for (let index = 0; index < coms.length; index++) {
             let name = this.getComponentName(coms[index]);
             if (name && name.startsWith("UI") && !name.endsWith("_Auto")) {
                 return name;
             }
         }
+
+        // 找不到UI开头的组件
+        for (let index = 0; index < coms.length; index++) {
+            let name = this.getComponentName(coms[index]);
+            if (name && !name.endsWith("_Auto")) {
+                return name;
+            }
+        }
+
+
+
         return null;
     },
 
