@@ -95,6 +95,12 @@ export const methods: { [key: string]: (...any: any) => any } = {
 
         // let ProjectDir = Editor.Project.path;
         let UIComName = this.getABComponentName(NodeRoot);
+        let ComFileName = path.basename(ComponentScriptPath, ".ts")
+        if (UIComName != ComFileName) {
+            console.warn(`组件名[${UIComName}]与脚本文件名[${ComFileName}]不一致,请确认代码内的组件名是否正确!`);
+            return;
+        }
+
         let AutoScriptName = `${UIComName}_Auto`;
         let AutoScriptPath = ``;
 
