@@ -1,6 +1,7 @@
 
 import { _decorator, Component } from 'cc';
 import FormMgr from './UIFrame/FormMgr';
+import UIManager from './UIFrame/UIManager';
 import UIConfig from './UIScript/UIConfig';
 const { ccclass, property } = _decorator;
 
@@ -9,6 +10,9 @@ const { ccclass, property } = _decorator;
 export class Main extends Component {
 
     start() {
+
+        UIManager.init(Main);
+
         FormMgr.open(UIConfig.UIHome);
     }
 }

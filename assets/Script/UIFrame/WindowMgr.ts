@@ -1,7 +1,9 @@
+import { log } from "cc";
 import PriorityQueue from "../Common/Utils/PriorityQueue";
 import PriorityStack from "../Common/Utils/PriorityStack";
-import { FormType } from "./config/SysDefine";
+import { FormType, SysDefine } from "./config/SysDefine";
 import { EPriority, GetForm, IFormConfig, IFormData } from "./Struct";
+import TipsMgr from "./TipsMgr";
 import UIManager from "./UIManager";
 
 
@@ -28,18 +30,36 @@ class WindowMgr {
     /** 打开窗体 */
     public async open(form: IFormConfig | string, params?: any, formData?: IFormData) {
         form = GetForm(form, FormType.Window);
-        let prefabPath = form.prefabUrl;
         formData = this._formatFormData(formData);
         if (this._showingList.size <= 0 || formData && (!formData.showWait && (formData.priority || EPriority.ZERO) >= this._showingList.getTopEPriority())) {
             this._showingList.push(form, formData?.priority);
             this._currWindow = this._showingList.getTopElement();
-            return await UIManager.getInstance().openForm(form, params, formData);
+            let loadingActive = formData?.loadingActive == null ? true : formData.loadingActive;
+
+            let url = form.prefabUrl;
+            if (loadingActive) {
+
+                log(`${url} show loading`);
+                await this.openLoading(formData?.loadingForm, params, formData);
+            }
+
+            return await UIManager.getInstance().openForm(form, params, formData, () => {
+                if (loadingActive) {
+                    log(`${url} loaded close loading`);
+                    this.closeLoading(formData?.loadingForm);
+                }
+            }, () => {
+                if (loadingActive) {
+                    log(`${url} failed close loading`);
+                    this.closeLoading(formData?.loadingForm);
+                }
+            });
         }
 
         // 入等待队列
         this._waitingList.enqueue({ form: form, params: params, formData: formData });
         // 加载窗体
-        return await UIManager.getInstance().loadUIForm(prefabPath);
+        return await UIManager.getInstance().loadUIForm(form);
     }
 
     public async close(form: IFormConfig | string, params?: any, formData?: IFormData) {
@@ -74,6 +94,21 @@ class WindowMgr {
 
     private _formatFormData(formData: any) {
         return Object.assign({ showWait: false, priority: EPriority.FIVE }, formData);
+    }
+
+    private async openLoading(
+        formConfig: IFormConfig,
+        params: any,
+        formData: IFormData
+    ) {
+        let form = formConfig || SysDefine.defaultLoadingForm;
+        if (!form) return;
+        await TipsMgr.open(form, params, formData);
+    }
+    private async closeLoading(formConfig: IFormConfig) {
+        let form = formConfig || SysDefine.defaultLoadingForm;
+        if (!form) return;
+        await TipsMgr.close(form);
     }
 }
 

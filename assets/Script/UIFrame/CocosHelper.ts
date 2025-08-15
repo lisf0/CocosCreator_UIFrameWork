@@ -31,6 +31,14 @@ export default class CocosHelper {
         });
     }
 
+    /** 停止tween */
+    public static stopTween(target: any) {
+        cc.Tween.stopAllByTarget(target);
+    }
+    public static stopTweenByTag(tag: number) {
+        cc.Tween.stopAllByTag(tag);
+    }
+
     /**
      * 
      * @param target 
@@ -197,6 +205,135 @@ export default class CocosHelper {
                 }
             });
         });
+    }
+
+
+    /** 加载资源 */
+    public static loadResFromBundleSync<T>(
+        bundle: cc.AssetManager.Bundle,
+        url: string,
+        type: typeof cc.Asset,
+        onProgress?: (completedCount: number, totalCount: number, item: any) => void
+    ): Promise<T> {
+        return new Promise((resolve, reject) => {
+
+            if (!onProgress) onProgress = this._onProgress;
+            bundle.load(url, type, onProgress, (err, asset: any) => {
+                if (err) {
+                    cc.error(`${url} [bundle.load] 错误 ${err}`);
+                    resolve(null);
+                } else {
+                    resolve(asset as T);
+                }
+            });
+        });
+    }
+
+
+    /** 加载资源 */
+    public static loadResFromBundleNameSync<T>(
+        bundleName: string,
+        url: string,
+        type: typeof cc.Asset,
+        onProgress?: (completedCount: number, totalCount: number, item: any) => void
+    ): Promise<T> {
+        return new Promise((resolve, reject) => {
+
+            let bundle = cc.assetManager.getBundle(bundleName);
+            if (!bundle) {
+                cc.assetManager.loadBundle(bundleName, (err, bundle) => {
+                    if (err) {
+                        cc.error(`${bundleName}-${url} [loadBundle] 错误 ${err}`);
+                        resolve(null);
+                    } else {
+                        this.loadResFromBundleSync<T>(bundle, url, type, onProgress).then((asset) => {
+                            resolve(asset);
+                        }).catch(reject);
+                    }
+                });
+            } else {
+                this.loadResFromBundleSync<T>(bundle, url, type, onProgress).then((asset) => {
+                    resolve(asset);
+                }).catch(reject);
+            }
+        });
+    }
+
+    /** 加载目录 */
+    public static loadDirFromBundleSync<T>(
+        bundle: cc.AssetManager.Bundle,
+        path: string,
+        onProgress?: (completedCount: number, totalCount: number, item: any) => void
+    ): Promise<T> {
+        return new Promise((resolve, reject) => {
+
+            if (!onProgress) onProgress = this._onProgress;
+            bundle.loadDir(path, onProgress, (err, asset: any) => {
+                if (err) {
+                    cc.error(`${path} [bundle.loadDir] 错误 ${err}`);
+                    resolve(null);
+                } else {
+                    resolve(asset as T);
+                }
+            });
+        });
+    }
+
+    /** 加载目录 */
+    public static preloadDirFromBundleSync<T>(
+        bundle: cc.AssetManager.Bundle,
+        path: string,
+        onProgress?: (finish: number, total: number, item: any) => void
+    ): Promise<T> {
+        return new Promise((resolve, reject) => {
+
+            if (!onProgress) onProgress = this._onProgress;
+            bundle.preloadDir(path, onProgress, (err, asset: any) => {
+                if (err) {
+                    cc.error(`${path} [bundle.loadDir] 错误 ${err}`);
+                    resolve(null);
+                } else {
+                    resolve(asset as T);
+                }
+            });
+        });
+    }
+
+    /**
+     * 加载目录
+     * @param url
+     * @param onProgress
+     * @returns
+     */
+    public static loadDirFromBundleNameSync<T>(
+        bundleName: string,
+        url: string,
+        onProgress?: (completedCount: number, totalCount: number, item: any) => void
+    ): Promise<T> {
+
+
+
+        return new Promise((resolve, reject) => {
+
+            let bundle = cc.assetManager.getBundle(bundleName);
+            if (!bundle) {
+                cc.assetManager.loadBundle(bundleName, (err, bundle) => {
+                    if (err) {
+                        cc.error(`${bundleName}-${url} [loadBundle] 错误 ${err}`);
+                        resolve(null);
+                    } else {
+                        this.loadDirFromBundleSync<T>(bundle, url, onProgress).then((asset) => {
+                            resolve(asset);
+                        }).catch(reject);
+                    }
+                });
+            } else {
+                this.loadDirFromBundleSync<T>(bundle, url, onProgress).then((asset) => {
+                    resolve(asset);
+                }).catch(reject);
+            }
+        });
+
     }
 
     /** 通过路径加载资源, 如果这个资源在bundle内, 会先加载bundle, 在解开bundle获得对应的资源 */

@@ -42,11 +42,10 @@ export default class ResMgr {
     }
 
     /** 加载窗体 */
-    public async loadFormPrefab(fid: string) {
+    public async loadFormPrefab(bundleName:string, url: string) {
+        const fid = `${bundleName}-${url}`;
         if (this._prefabs[fid]) return this._prefabs[fid];
-        let result = await this._loadResWithReference<cc.Prefab>(fid, cc.Prefab);
-        if (!result) return;
-        let { res, deps } = result;
+        let { res, deps } = await this._loadResWithReference<cc.Prefab>(bundleName,url, cc.Prefab);
         this._prefabDepends[fid] = deps;
         this._prefabs[fid] = res;
         return res;
@@ -68,10 +67,8 @@ export default class ResMgr {
 
 
     /** 动态资源管理, 通过tag标记当前资源, 统一释放 */
-    public async loadDynamicRes<T>(url: string, type: typeof cc.Asset, tag: string) {
-        let result = await this._loadResWithReference<T>(url, type);
-        if (!result) return;
-        let { res, deps } = result;
+    public async loadDynamicRes<T>(bundleName:string,url: string, type: typeof cc.Asset, tag: string) {
+        let { res, deps } = await this._loadResWithReference<T>(bundleName,url, type);
         if (!this._dynamicTags[tag]) {
             this._dynamicTags[tag] = [];
         }
@@ -94,8 +91,8 @@ export default class ResMgr {
 
 
     /** 加载资源并添加引用计数 */
-    private async _loadResWithReference<T>(url: string, type: typeof cc.Asset) {
-        let res = await CocosHelper.loadResSync<T>(url, type, this._addTmpAssetsDepends.bind(this));
+    private async _loadResWithReference<T>(bundleName:string,url: string, type: typeof cc.Asset) {
+        let res = await CocosHelper.loadResFromBundleNameSync<T>(bundleName, url, type, this._addTmpAssetsDepends.bind(this));
         if (!res) {
             this._clearTmpAssetsDepends();
             return null;

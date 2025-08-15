@@ -2,7 +2,7 @@ import * as cc from "cc";
 
 import CocosHelper from "./CocosHelper";
 import { ModalOpacity } from "./config/SysDefine";
-import { UIWindow } from "./UIForm";
+import { UIWindowBase } from "./UIForm";
 import UIManager from "./UIManager";
 import WindowMgr from "./WindowMgr";
 
@@ -87,7 +87,7 @@ export default class UIModalScript extends cc.Component {
     }
 
     public async clickMaskWindow() {
-        let com = UIManager.getInstance().getForm(this.fid) as UIWindow;
+        let com = UIManager.getInstance().getForm(this.fid) as UIWindowBase;
         if (com && com.modalType.clickMaskClose) {
             await WindowMgr.close(this.fid);
         }

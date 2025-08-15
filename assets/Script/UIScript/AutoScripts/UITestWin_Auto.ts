@@ -1,6 +1,7 @@
 
 import { _decorator, Component, Sprite, Button, Label } from 'cc';
 const { ccclass, property } = _decorator;
+
 @ccclass("UITestWin_Auto")
 export default class UITestWin_Auto extends Component {
 	@property(Sprite)
@@ -9,5 +10,9 @@ export default class UITestWin_Auto extends Component {
 	button: Button | null = null;
 	@property(Label)
 	label: Label | null = null;
+	@property(Button)
+	btn2: Button | null = null;
+	@property(Button)
+	btn3: Button | null = null;
  
 }

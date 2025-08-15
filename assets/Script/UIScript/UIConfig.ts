@@ -5,10 +5,20 @@ export default class UIConfig {
         prefabUrl: "Forms/UIHome",
         type: "UIScreen"
     }
+    static UILoading = {
+        bundleName:"resources",
+        prefabUrl: "Forms/UILoading",
+        type: "UITips"
+    }
     static UITestWin = {
         bundleName:"resources",
         prefabUrl: "Forms/UITestWin",
         type: "UIWindow"
+    }
+    static UIToast = {
+        bundleName:"resources",
+        prefabUrl: "Forms/UIToast",
+        type: "UIToast"
     }
     
 }

@@ -62,10 +62,9 @@ class FormMgr {
         await WindowMgr.closeAll();
     }
 
-    async load(form: IFormConfig) {
-        await UIManager.getInstance().loadUIForm(form.prefabUrl);
+    async closeShowingForms() {
+        await UIManager.getInstance().closeShowingForms();
     }
-
 }
 
 const mgr = new FormMgr();

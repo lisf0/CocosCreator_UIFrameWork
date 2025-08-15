@@ -220,38 +220,114 @@ export class CommonUtils {
         return visibleRect;
     }
 
-    public static httpGet(url: string, cb: Function) {
-        let xhr = cc.loader.getXMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            // cc.log("Get: readyState:" + xhr.readyState + " status:" + xhr.status);
-            if (xhr.readyState === 4 && xhr.status == 200) {
-                let respone = xhr.responseText;
-                let rsp = JSON.parse(respone);
-                cb(rsp);
-            } else if (xhr.readyState === 4 && xhr.status == 401) {
-                cb({ "ret": 1 });
-            } else {
-                //callback(-1);
-            }
-        };
-        xhr.withCredentials = true;
-        xhr.open('GET', url, true);
-        xhr.withCredentials = false;
-        // if (cc.sys.isNative) {
-        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-        xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST');
-        xhr.setRequestHeader('Access-Control-Allow-Headers', 'x-requested-with,content-type,authorization');
-        xhr.setRequestHeader("Content-Type", "application/json");
-        //xhr.setRequestHeader('Authorization', 'Bearer ' + cc.myGame.gameManager.getToken());
-        // xhr.setRequestHeader('Authorization', 'Bearer ' + "");
-        // }
 
-        // note: In Internet Explorer, the timeout property may be set only after calling the open()
-        // method and before calling the send() method.
-        xhr.timeout = 8000;// 8 seconds for timeout
 
-        xhr.send();
-    }
+	public static httpGet(url: string, cb: Function) {
+		cc.log(`httpGet:${url}`);
+		let xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function () {
+			// cc.log("Get: readyState:" + xhr.readyState + " status:" + xhr.status);
+			if (xhr.readyState === 4) {
+				if (xhr.status == 200) {
+					let respone = xhr.responseText;
+					cc.log(`httpGet:${url} respone = `, respone);
+					let rsp = JSON.parse(respone);
+					cb(0, rsp);
+				} else if (xhr.status == 401) {
+					cb(1);
+				} else {
+					cb(-1);
+				}
+			}
+		};
+		xhr.ontimeout = function () {
+			xhr.abort();
+			cb(-2);
+		};
+		xhr.onerror = function () {
+			xhr.abort();
+			if (xhr.readyState !== 4) {	//避免走两遍
+				if (xhr.status != 0) {
+					cb(-3);
+				}
+			}
+		};
+		xhr.withCredentials = true;
+		xhr.open("GET", url, true);
+		xhr.withCredentials = false;
+		// xhr.setRequestHeader("Cache-Control", "no-cache"); // 禁用缓存
+		// if (cc.sys.isNative) {
+		// xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+		// xhr.setRequestHeader("Access-Control-Allow-Methods", "GET, POST");
+		// xhr.setRequestHeader(
+		// 	"Access-Control-Allow-Headers",
+		// 	"x-requested-with,content-type,authorization"
+		// );
+		// xhr.setRequestHeader("Content-Type", "application/json");
+		//xhr.setRequestHeader('Authorization', 'Bearer ' + cc.myGame.gameManager.getToken());
+		// xhr.setRequestHeader('Authorization', 'Bearer ' + "");
+		// }
+
+		// note: In Internet Explorer, the timeout property may be set only after calling the open()
+		// method and before calling the send() method.
+		xhr.timeout = 8000; // 8 seconds for timeout
+
+		xhr.send();
+	}
+
+	public static httpPost(url: string, data, cb: Function, token: string) {
+
+		cc.log(`httpPost:${url} request = `, JSON.stringify(data));
+		let xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function () {
+			// cc.log("Get: readyState:" + xhr.readyState + " status:" + xhr.status);
+
+			if (xhr.readyState === 4) {
+				if (xhr.status == 200) {
+					let respone = xhr.responseText;
+					cc.log(`httpPost:${url} respone = `, respone);
+					let rsp = JSON.parse(respone);
+					cb(0, rsp);
+				} else if (xhr.status == 401) {
+					cb(1);
+				} else {
+					cb(-1);
+				}
+			}
+		};
+		xhr.ontimeout = function () {
+			xhr.abort();
+			cb(-2);
+		};
+		xhr.onerror = function () {
+			xhr.abort();
+			if (xhr.readyState !== 4) {	//避免走两遍
+				if (xhr.status != 0) {
+					cb(-3);
+				}
+			}
+		}
+		xhr.withCredentials = true;
+		xhr.open("POST", url, true);
+		xhr.withCredentials = false;
+		// if (cc.sys.isNative) {
+		xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+		xhr.setRequestHeader("Access-Control-Allow-Methods", "GET, POST");
+		xhr.setRequestHeader(
+			"Access-Control-Allow-Headers",
+			"x-requested-with,content-type,authorization"
+		);
+		xhr.setRequestHeader("Content-Type", "application/json");
+		xhr.setRequestHeader("Authorization", "Bearer " + token);
+		// xhr.setRequestHeader("Cache-Control", "no-cache"); // 禁用缓存
+		// xhr.setRequestHeader('Authorization', 'Bearer ' + "");
+		// }
+
+		// note: In Internet Explorer, the timeout property may be set only after calling the open()
+		// method and before calling the send() method.
+		xhr.timeout = 68000; // 30 seconds for timeout
+		xhr.send(JSON.stringify(data));
+	}
 
     /**
      * Box-Muller algorithm

@@ -3,8 +3,7 @@ import * as cc from "cc";
 import AdapterMgr from "./AdapterMgr";
 import CocosHelper from "./CocosHelper";
 import { FormType } from "./config/SysDefine";
-import ResMgr from "./ResMgr";
-import { ECloseType, GetForm, IFormConfig, IFormData } from "./Struct";
+import { ECloseType, IFormConfig, IFormData } from "./Struct";
 
 //@ts-ignore
 window["ab"] = {};
@@ -15,6 +14,7 @@ window["ab"] = {};
 export class ABComponent extends cc.Component {
     /** 是否已经调用过preinit方法 */
     protected _inited = false;
+    public params: any | null = null;
     public view: cc.Component | null = null;
 
     /** 可以在这里进行一些资源的加载, 具体实现可以看test下的代码 */
@@ -37,8 +37,9 @@ export class ABComponent extends cc.Component {
     /** 预先初始化 */
     public async _preInit(params: any) {
         if (this._inited) return;
+        this.params = params;
         this._inited = true;
-        this.view = this.getView();
+        this.view = this.view || this.getView();
         // 加载这个UI依赖的其他资源
         let errorMsg = await this.load(params);
         if (errorMsg) {
@@ -49,8 +50,24 @@ export class ABComponent extends cc.Component {
         return true;
     }
 
-    /** 初始化, 只调用一次 */
+    /**
+     * 初始化完成,异步完成逻辑
+     * @param params 
+     */
     public async onInit(params: any) { }
+
+    /**
+     * 子类不建议重写, 建议重写onInit来处理,如需同步处理,则重写onLoaded或者在start内处理
+     */
+    public onLoad() {
+        this.view = this.getView();
+        this._preInit(null);
+        this.onLoaded();
+    }
+
+    public onLoaded() {
+
+    }
 }
 
 //@ts-ignore
@@ -89,28 +106,19 @@ export default class UIBase extends ABComponent {
             FormMgr.close(this.UIConfig);
         }
     }
-    /** 预先初始化 */
-    public async _preInit(params: any) {
-        if (this._inited) return;
-        this._inited = true;
-        this.view = this.getView();
-        // 加载这个UI依赖的其他资源
-        let errorMsg = await this.load(params);
-        if (errorMsg) {
-            cc.error(errorMsg);
-            this.closeSelf();
-            return false;
-        }
-        this.onInit(params);
-        return true;
-    }
 
     model: any = null;
 
-    /** 可以在这里进行一些资源的加载, 具体实现可以看test下的代码 */
-    public async load(params: any) {
-        return null;
+    /**
+     * 子类不建议重写, 建议重写onInit来处理,如需同步处理,则重写onLoaded或者在start内处理
+     */
+    public onLoad(): void {
+        this.view = this.getView();
+        this.onLoaded();
     }
+
+    /** 可以在这里进行一些资源的加载, 具体实现可以看test下的代码 */
+    // public async load(params: any) { return null; }
 
     /** 初始化, 只调用一次 */
     // public onInit(params: any) { }
@@ -125,9 +133,16 @@ export default class UIBase extends ABComponent {
 
     // 关闭自己
     public async closeSelf(params?: any): Promise<boolean> {
+        let arr = this.fid.split("-");
+        const bundleName = arr[0];
+        const prefabUrl = arr[1];
         //@ts-ignore 避免循环引用
         const FormMgr = window["FormMgr"];
-        return FormMgr.close(GetForm(this.fid, this.formType), params);
+        return await FormMgr.close({
+            bundleName,
+            prefabUrl,
+            type: this.formType
+        }, params);
     }
 
     /**
@@ -150,9 +165,9 @@ export default class UIBase extends ABComponent {
         this._blocker.node.active = block;
     }
 
-    public async loadRes(url: string, type?: typeof cc.Asset) {
-        return await ResMgr.inst.loadDynamicRes(url, type || cc.Asset, this.fid);
-    }
+    // public async loadRes(url: string, type?: typeof cc.Asset) {
+    // return await ResMgr.inst.loadDynamicRes(url, type || cc.Asset, this.fid);
+    // }
 }
 
 // @ts-ignore

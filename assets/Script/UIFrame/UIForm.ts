@@ -7,12 +7,12 @@ import { ECloseType, ModalType } from "./Struct";
 import UIBase from "./UIBase";
 
 
-export class UIScreen extends UIBase {
+export class UIScreenBase extends UIBase {
     formType = FormType.Screen;
     closeType = ECloseType.CloseAndDestory;
 }
 
-export class UIWindow extends UIBase {
+export class UIWindowBase extends UIBase {
     formType = FormType.Window;
     modalType = new ModalType(ModalOpacity.OpacityFull);                // 阴影类型
     closeType = ECloseType.LRU;
@@ -24,17 +24,17 @@ export class UIWindow extends UIBase {
     }
 }
 
-export class UIFixed extends UIBase {
+export class UIFixedBase extends UIBase {
     formType = FormType.Fixed;
     closeType = ECloseType.LRU;
 }
 
-export class UITips extends UIBase {
+export class UITipsBase extends UIBase {
     formType = FormType.Tips;
     closeType = ECloseType.CloseAndHide;
 }
 
-export class UIToast extends UIBase implements IPool {
+export class UIToastBase extends UIBase implements IPool {
     formType = FormType.Toast;
 
     public use() {
@@ -42,22 +42,24 @@ export class UIToast extends UIBase implements IPool {
     }
 
     public free() {
-
     }
 
     public async closeSelf(): Promise<boolean> {
-        return await FormMgr.close({ prefabUrl: this.fid, type: this.formType });
+        let arr = this.fid.split("-");
+        const bundleName = arr[0];
+        const prefabUrl = arr[1];
+        return await FormMgr.close({ bundleName, prefabUrl, type: this.formType });
     }
 }
 
 
 // @ts-ignore
-ab.UIScreen = UIScreen;
+ab.UIScreen = UIScreenBase;
 // @ts-ignore
-ab.UIWindow = UIWindow;
+ab.UIWindow = UIWindowBase;
 // @ts-ignore
-ab.UIFixed = UIFixed;
+ab.UIFixed = UIFixedBase;
 // @ts-ignore
-ab.UITips = UITips;
+ab.UITips = UITipsBase;
 // @ts-ignore
-ab.UIToast = UIToast;
+ab.UIToast = UIToastBase;

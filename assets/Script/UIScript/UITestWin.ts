@@ -1,11 +1,17 @@
 
 import { _decorator, log, Texture2D } from 'cc';
-import { UIWindow } from '../UIFrame/UIForm';
+import { ModalOpacity } from '../UIFrame/config/SysDefine';
+import FormMgr from '../UIFrame/FormMgr';
+import { ModalType } from '../UIFrame/Struct';
+import { UIWindowBase } from '../UIFrame/UIForm';
 import UITestWin_Auto from './AutoScripts/UITestWin_Auto';
+import UIConfig from './UIConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('UITestWin')
-export class UITestWin extends UIWindow {
+export class UITestWin extends UIWindowBase {
+
+    modalType = new ModalType(ModalOpacity.OpacityHalf);
     public view: UITestWin_Auto | null = null;
 
     createTexture() {
@@ -45,6 +51,20 @@ export class UITestWin extends UIWindow {
             log("close test win");
             this.closeSelf();
         }, this);
+
+        this.view.btn2.addClick(() => {
+            FormMgr.open(UIConfig.UILoading);
+
+            this.scheduleOnce(() => {
+                FormMgr.close(UIConfig.UILoading);
+            }, 3)
+
+        }, this);
+
+        this.view.btn3.addClick(() => {
+            FormMgr.open(UIConfig.UIToast, "test");
+        }, this);
+
 
 
     }

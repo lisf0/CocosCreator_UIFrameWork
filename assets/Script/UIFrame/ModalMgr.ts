@@ -2,7 +2,7 @@ import * as cc from "cc";
 
 import { SysDefine } from "./config/SysDefine";
 import { ModalType } from "./Struct";
-import { UIWindow } from "./UIForm";
+import { UIWindowBase } from "./UIForm";
 import UIModalScript from "./UIModalScript";
 
 /**
@@ -38,7 +38,7 @@ export default class ModalMgr extends cc.Component {
         await this.uiModal.showModal(maskType.opacity, maskType.easingTime, maskType.isEasing);
     }
 
-    public checkModalWindow(coms: UIWindow[]) {
+    public checkModalWindow(coms: UIWindowBase[]) {
         if (!this.uiModal || !this.PopUpRoot) return;
         if (coms.length <= 0) {
             this.uiModal.node.active = false;

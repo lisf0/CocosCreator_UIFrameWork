@@ -25,6 +25,7 @@ export class ModalType {
  * IFormConfig和AutoConfig对应, 是窗体的固定属性, 不会动态修改.
  */
 export interface IFormConfig {
+    bundleName: string;
     prefabUrl: string;
     type: string;
 }
@@ -32,6 +33,8 @@ export interface IFormConfig {
 export function GetForm(form: IFormConfig | string, type = FormType.Screen): IFormConfig {
     if (typeof form === "string") {
         return {
+            //@ts-ignore
+            bundleName: cc.AssetManager.BuiltinBundleName.RESOURCES,
             prefabUrl: form,
             type: type
         }
@@ -41,6 +44,7 @@ export function GetForm(form: IFormConfig | string, type = FormType.Screen): IFo
 
 export interface IFormData {
     loadingForm?: IFormConfig;
+    loadingActive?: boolean;    //loading动画是否显示,默认显示
     onClose?: Function;
     quick?: boolean;             // 快速打开/关闭, 不播放打开/关闭动画
     // window类型才有

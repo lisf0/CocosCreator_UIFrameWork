@@ -1,5 +1,5 @@
-import * as cc from "cc";
-
+import { error, js, log, warn } from "cc";
+import { DEBUG } from "cc/env";
 import { IPool, Pool } from "../Common/Utils/Pool";
 
 export class EventInfo implements IPool {
@@ -35,13 +35,29 @@ class RemoveCommand {
 let idSeed = 1;         // 这里有一个小缺陷就是idSeed有最大值,Number.MAX_VALUE
 export class EventCenter {
 
-    private static _listeners: { [eventName: string]: { [id: string]: Array<EventInfo> } } = cc.js.createMap();
+    private static _listeners: { [eventName: string]: { [id: string]: Array<EventInfo> } } = js.createMap();
     private static _dispatching: number = 0;
     private static _removeCommands: RemoveCommand[] = [];
 
     private static _eventPool: Pool<EventInfo> = new Pool<EventInfo>(() => {
         return new EventInfo();
     }, 10);
+
+    public static has(eventName: string, target: any = undefined) {
+        target = target || this;
+        let targetId = target['uuid'] || target['id'];
+        if (!targetId) return false;
+
+        let collection = this._listeners[eventName];
+        if (!collection) return false;
+        let events = collection[targetId];
+        if (events) {
+            return true;
+        }
+
+        return false;
+
+    }
 
     public static on(eventName: string, callback: Function, target: any = undefined, once = false) {
         target = target || this;
@@ -156,3 +172,7 @@ export class EventCenter {
 
 // EventCenter.emit('Event1', '123');
 // EventCenter.emit('EventOnce', '123');
+
+if (DEBUG) {
+    window["EventCenter"] = EventCenter;
+}

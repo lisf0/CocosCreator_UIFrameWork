@@ -147,8 +147,10 @@ export const methods: { [key: string]: (...any: any) => any } = {
         for (let key in nodeMaps) {
             let type = nodeMaps[key][0];
             let arr = type.split(".");
-            if (arr[0] == "cc" && _cc_comps.indexOf(arr[1]) == -1) {
-                _cc_comps.push(arr[1]);
+            if (arr[0] == "cc") {
+                if (_cc_comps.indexOf(arr[1]) == -1) {
+                    _cc_comps.push(arr[1]);
+                }
                 type = arr[1];
             }
             _str_content += `\t@property(${type})\n\t${key}: ${type} | null = null;\n`;

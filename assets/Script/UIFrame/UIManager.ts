@@ -2,7 +2,6 @@ import * as cc from "cc";
 
 import { DEBUG } from "cc/env";
 import { LRUCache } from "../Common/Utils/LRUCache";
-import Scene from "../Scene/Scene";
 import AdapterMgr, { AdapterType } from "./AdapterMgr";
 import { FormType, SysDefine } from "./config/SysDefine";
 import { EventCenter } from "./EventCenter";
@@ -11,7 +10,7 @@ import ModalMgr from "./ModalMgr";
 import ResMgr from "./ResMgr";
 import { ECloseType, IFormConfig, IFormData } from "./Struct";
 import UIBase from "./UIBase";
-import { UIWindow } from "./UIForm";
+import { UIWindowBase } from "./UIForm";
 
 /**
  * @author honmono
@@ -25,7 +24,7 @@ export default class UIManager {
     private _ndToast: cc.Node | null = null;  // toast
     private _ndTips: cc.Node | null = null;  // 独立窗体
 
-    private _windows: UIWindow[] = [];                   // 存储弹出的窗体
+    private _windows: UIWindowBase[] = [];                   // 存储弹出的窗体
     private _allForms: { [key: string]: UIBase | null } = cc.js.createMap();    // 所有已经挂载的窗体, 可能没有显示
     private _showingForms: { [key: string]: UIBase | null } = cc.js.createMap();    // 正在显示的窗体
     private _tipsForms: { [key: string]: UIBase | null } = cc.js.createMap();    // 独立窗体 独立于其他窗体, 不受其他窗体的影响
@@ -33,19 +32,28 @@ export default class UIManager {
     private _closingForm: { [key: string]: UIBase | null } = cc.js.createMap();    // 正在关闭的form
     private _LRUCache: LRUCache = new LRUCache(3);                                             // LRU cache
 
+    private static _sceneComp?: (new () => cc.Component);
+    public static init(comp?: (new () => cc.Component)) {
+        this._sceneComp = comp;
+    }
     private static instance: UIManager | null = null;                                                 // 单例
     public static getInstance(): UIManager {
         if (this.instance == null) {
+            if (this._sceneComp == null) {
+                console.error(`Missing scene component, please set UIManager.init(SceneComponent);`);
+                return null;
+            }
+
             this.instance = new UIManager();
             let canvas = cc.director.getScene()?.getChildByName("Canvas");
             if (!canvas) return this.instance;
             let scene: any = canvas.getChildByName(SysDefine.SYS_SCENE_NODE);
             if (!scene) {
                 scene = new cc.Node(SysDefine.SYS_SCENE_NODE);
-                scene.addComponent(Scene);
+                scene.addComponent(this._sceneComp);
                 scene.parent = canvas;
             } else {
-                !(scene.getComponent(Scene)) && scene.addComponent(Scene);
+                !(scene.getComponent(this._sceneComp)) && scene.addComponent(this._sceneComp);
             }
             let UIROOT = this.instance._UIROOT = new cc.Node(SysDefine.SYS_UIROOT_NODE);
             scene.addChild(UIROOT);
@@ -63,12 +71,15 @@ export default class UIManager {
     }
 
     /** 预加载UIForm */
-    public async loadUIForm(prefabPath: string) {
-        let uiBase = await this._loadForm(prefabPath);
+    public async loadUIForm(form: IFormConfig): Promise<UIBase> {
+        const bundleName = form.bundleName;
+        const prefabPath = form.prefabUrl;
+        let uiBase = await this._loadForm(bundleName, prefabPath);
         if (!uiBase) {
             console.warn(`${uiBase}没有被成功加载`);
             return null;
         }
+        cc.log(`预加载窗体: ${bundleName}-${prefabPath}`);
         return uiBase;
     }
 
@@ -79,23 +90,48 @@ export default class UIManager {
      * @param formData 
      * @returns 
      */
-    public async openForm(form: IFormConfig, params?: any, formData?: IFormData): Promise<UIBase | null> {
-        let prefabPath = form.prefabUrl;
+    public async openForm(form: IFormConfig, params?: any, formData?: IFormData, loaded?: (value: UIBase) => void, failed?: (value: Error) => void): Promise<UIBase | null> {
+        const bundleName = form.bundleName;
+        const prefabPath = form.prefabUrl;
+        const fid = `${bundleName}-${prefabPath}`;
+
         if (!prefabPath || prefabPath.length <= 0) {
-            cc.warn(`${prefabPath}, 参数错误`);
+            cc.warn(`${bundleName}-${prefabPath}, 参数错误`);
+            if (failed) {
+                failed(new Error(`${bundleName}-${prefabPath}, 参数错误`));
+            }
+            return;
+        }
+        if (this.checkFormShowing(fid)) {
+            cc.warn(`${bundleName}-${prefabPath}, 窗体正在显示中`);
+            if (failed) {
+                failed(new Error(`${bundleName}-${prefabPath}, 窗体正在显示中`));
+            }
             return null;
         }
-        if (this.checkFormShowing(prefabPath)) {
-            cc.warn(`${prefabPath}, 窗体正在显示中`);
-            return null;
-        }
-        let com = await this._loadForm(prefabPath);
+        let com = await this._loadForm(bundleName, prefabPath);
         if (!com) {
-            cc.warn(`${prefabPath} 加载失败了!`);
+            cc.warn(`${bundleName}-${prefabPath} 加载失败了!`);
+            if (failed) {
+                failed(new Error(`${bundleName}-${prefabPath} 加载失败了!`));
+            }
             return null;
         }
+
+        if (this.checkFormCloseing(fid)) {
+            cc.warn(`${bundleName}-${prefabPath}, 窗体正在关闭中`);
+            if (failed) {
+                failed(new Error(`${bundleName}-${prefabPath}, 窗体正在关闭中`));
+            }
+            return;
+        }
+
+        if (loaded) {
+            loaded(com);
+        }
+        cc.log(`打开窗体: ${bundleName}-${prefabPath},params: ${params}`);
         // 初始化窗体名称
-        com.fid = prefabPath;
+        com.fid = fid;
         com.formData = formData;
 
         switch (com.formType) {
@@ -123,45 +159,47 @@ export default class UIManager {
 
     /**
      * 重要方法 关闭一个UIForm
-     * @param prefabPath 
+     * @param prefabPath
      */
-    public async closeForm(form: IFormConfig, params?: any, formData?: IFormData): Promise<boolean> {
+    public async closeForm(
+        form: IFormConfig,
+        params?: any,
+        formData?: IFormData
+    ): Promise<boolean> {
+        let bundleName = form.bundleName;
         let prefabPath = form.prefabUrl;
+        const fid = `${bundleName}-${prefabPath}`;
         if (!prefabPath || prefabPath.length <= 0) {
-            cc.warn(TAG, `${prefabPath}, 参数错误`);
+            cc.warn(TAG, `${bundleName}-${prefabPath}, 参数错误`);
             return false;
-        };
-        let com = this._allForms[prefabPath];
+        }
+        let com = this._allForms[fid];
         if (!com) return false;
 
-        if (!this.checkFormShowing(prefabPath) && form.type !== FormType.Tips) {
-            cc.warn(TAG, `${prefabPath}, 已经关闭了, 请不要重复关闭`);
-            return false;
+        if (this._closingForm[fid]) {
+            cc.warn(TAG, `${bundleName}-${prefabPath}, form正在关闭中`);
+            return;
         }
-
-        if (this._closingForm[prefabPath]) {
-            cc.warn(TAG, `${prefabPath}, form正在关闭中`);
-            return false;
-        }
-        this._closingForm[prefabPath] = com;
+        cc.log(`关闭窗体: ${bundleName}-${prefabPath}`);
+        this._closingForm[fid] = com;
 
         switch (com.formType) {
             case FormType.Screen:
-                await this.exitToScreen(prefabPath, params);
+                await this.exitToScreen(fid, params);
                 break;
-            case FormType.Fixed:                             // 普通模式显示
-                await this.exitToFixed(prefabPath, params);
+            case FormType.Fixed: // 普通模式显示
+                await this.exitToFixed(fid, params);
                 break;
             case FormType.Window:
-                await this.exitToPopup(prefabPath, params);
-                EventCenter.emit(EventType.WindowClosed, prefabPath);
+                await this.exitToPopup(fid, params);
+                EventCenter.emit(EventType.WindowClosed, form);
                 break;
             case FormType.Tips:
-                await this.exitToTips(prefabPath, params);
+                await this.exitToTips(fid, params);
                 break;
         }
 
-        EventCenter.emit(EventType.FormClosed, prefabPath);
+        EventCenter.emit(EventType.FormClosed, form);
 
         if (com.formData) {
             com.formData.onClose && com.formData.onClose();
@@ -178,8 +216,8 @@ export default class UIManager {
         }
 
         // 从_closingForm去除
-        this._closingForm[prefabPath] = null;
-        delete this._closingForm[prefabPath];
+        this._closingForm[fid] = null;
+        delete this._closingForm[fid];
 
         return true;
     }
@@ -187,38 +225,37 @@ export default class UIManager {
     /**
      * 从窗口缓存中加载(如果没有就会在load加载), 并挂载到结点上
      */
-    private async _loadForm(prefabPath: string): Promise<UIBase> {
-        let com = this._allForms[prefabPath];
+    private async _loadForm(bundleName: string, prefabPath: string): Promise<UIBase> {
+        const fid = `${bundleName}-${prefabPath}`;
+        let com = this._allForms[fid];
         if (com) return com;
         return new Promise((resolve, reject) => {
-            if (this._loadingForm[prefabPath]) {
-                this._loadingForm[prefabPath].push(resolve);
+            if (this._loadingForm[fid]) {
+                this._loadingForm[fid].push(resolve);
                 return;
             }
-            this._loadingForm[prefabPath] = [resolve];
-            this._doLoadUIForm(prefabPath).then((com: UIBase | null) => {
-                for (const func of this._loadingForm[prefabPath]) {
-                    com && func(com);
+            this._loadingForm[fid] = [resolve];
+            this._doLoadUIForm(bundleName, prefabPath).then((com: UIBase) => {
+                for (const func of this._loadingForm[fid]) {
+                    func(com);
                 }
-                this._loadingForm[prefabPath] = [];
-                delete this._loadingForm[prefabPath];
+                this._loadingForm[fid] = null;
+                delete this._loadingForm[fid];
             });
         });
     }
 
     /**
-     * @param prefabPath 
+     * @param prefabPath
      */
-    private async _doLoadUIForm(prefabPath: string): Promise<UIBase | null> {
-        let prefab = await ResMgr.inst.loadFormPrefab(prefabPath);
-        if (prefab) {
-            let node = cc.instantiate(prefab);
-            let com = this.addNode(node);
-            this._allForms[prefabPath] = com;
-            return com;
-        }
-        return null;
+    private async _doLoadUIForm(bundleName: string, prefabPath: string): Promise<UIBase> {
+        const fid = `${bundleName}-${prefabPath}`;
+        let prefab = await ResMgr.inst.loadFormPrefab(bundleName, prefabPath);
+        let node = cc.instantiate(prefab);
+        let com = this.addNode(node);
+        this._allForms[fid] = com;
 
+        return com;
     }
 
     public addNode(node: cc.Node) {
@@ -252,13 +289,7 @@ export default class UIManager {
     /** 添加到screen中 */
     private async enterToScreen(fid: string, params: any) {
         // 关闭其他显示的窗口 
-        let arr: Array<Promise<boolean>> = [];
-        for (let key in this._showingForms) {
-            if (this._showingForms[key]) {
-                arr.push(this._showingForms[key].closeSelf());
-            }
-        }
-        await Promise.all(arr);
+        await this.closeShowingForms();
 
         let com = this._allForms[fid];
         if (!com) return;
@@ -271,6 +302,16 @@ export default class UIManager {
 
         await this.showEffect(com);
         com.onAfterShow(params);
+    }
+
+    public async closeShowingForms() {
+        let arr: Array<Promise<boolean>> = [];
+        for (let key in this._showingForms) {
+            if (this._showingForms[key]) {
+                arr.push(this._showingForms[key].closeSelf());
+            }
+        }
+        await Promise.all(arr);
     }
 
     /** 添加到Fixed中 */
@@ -287,7 +328,7 @@ export default class UIManager {
 
     /** 添加到popup中 */
     private async enterToPopup(fid: string, params: any) {
-        let com = this._allForms[fid] as UIWindow;
+        let com = this._allForms[fid] as UIWindowBase;
         if (!com) return;
         await com._preInit(params);
 
@@ -350,7 +391,7 @@ export default class UIManager {
 
     private async exitToPopup(fid: string, params?: any) {
         if (this._windows.length <= 0) return;
-        let com: UIWindow | null = null;
+        let com: UIWindowBase | null = null;
         for (let i = this._windows.length - 1; i >= 0; i--) {
             if (this._windows[i].fid === fid) {
                 com = this._windows[i];
@@ -424,9 +465,22 @@ export default class UIManager {
 
     }
 
+
     /** 窗体是否正在显示 */
     public checkFormShowing(fid: string) {
-        return !!this._showingForms[fid];
+        let com = this._allForms[fid];
+        if (!com) return false;
+
+        if (this.checkFormCloseing(fid)) {
+            return false;
+        }
+
+        return com.node.active;
+    }
+
+    /** 窗体是否正在关闭中 */
+    public checkFormCloseing(fid: string) {
+        return this._closingForm[fid] != null;
     }
 
     /** 窗体是否正在加载 */

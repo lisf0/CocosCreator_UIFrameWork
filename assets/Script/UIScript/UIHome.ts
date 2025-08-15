@@ -1,13 +1,13 @@
 
 import { _decorator } from 'cc';
 import FormMgr from '../UIFrame/FormMgr';
-import { UIScreen } from '../UIFrame/UIForm';
+import { UIScreenBase } from '../UIFrame/UIForm';
 import UIHome_Auto from './AutoScripts/UIHome_Auto';
 import UIConfig from './UIConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIHome')
-export class UIHome extends UIScreen {
+export class UIHome extends UIScreenBase {
     public view: UIHome_Auto | null = null;
 
     start() {
