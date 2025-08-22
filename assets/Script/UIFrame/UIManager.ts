@@ -35,6 +35,35 @@ export default class UIManager {
     private static _sceneComp?: (new () => cc.Component);
     public static init(comp?: (new () => cc.Component)) {
         this._sceneComp = comp;
+
+        if (this._sceneComp == null) {
+            console.error(`Missing scene component, please set UIManager.init(SceneComponent);`);
+            return null;
+        }
+
+        this.instance = new UIManager();
+        let canvas = cc.director.getScene()?.getChildByName("Canvas");
+        if (!canvas) return this.instance;
+        let scene: any = canvas.getChildByName(SysDefine.SYS_SCENE_NODE);
+        if (!scene) {
+            scene = new cc.Node(SysDefine.SYS_SCENE_NODE);
+            scene.addComponent(this._sceneComp);
+            scene.parent = canvas;
+        } else {
+            !(scene.getComponent(this._sceneComp)) && scene.addComponent(this._sceneComp);
+        }
+        let UIROOT = this.instance._UIROOT = new cc.Node(SysDefine.SYS_UIROOT_NODE);
+        scene.addChild(UIROOT);
+
+        UIROOT.addChild(this.instance._ndScreen = new cc.Node(SysDefine.SYS_SCREEN_NODE));
+        UIROOT.addChild(this.instance._ndFixed = new cc.Node(SysDefine.SYS_FIXED_NODE));
+        UIROOT.addChild(this.instance._ndPopUp = new cc.Node(SysDefine.SYS_POPUP_NODE));
+        UIROOT.addChild(this.instance._ndToast = new cc.Node(SysDefine.SYS_TOAST_NODE));
+        UIROOT.addChild(this.instance._ndTips = new cc.Node(SysDefine.SYS_TOPTIPS_NODE));
+        cc.director.once(cc.Director.EVENT_BEFORE_SCENE_LAUNCH, () => {
+            this.instance = null;
+        });
+
     }
     private static instance: UIManager | null = null;                                                 // 单例
     public static getInstance(): UIManager {
@@ -43,29 +72,6 @@ export default class UIManager {
                 console.error(`Missing scene component, please set UIManager.init(SceneComponent);`);
                 return null;
             }
-
-            this.instance = new UIManager();
-            let canvas = cc.director.getScene()?.getChildByName("Canvas");
-            if (!canvas) return this.instance;
-            let scene: any = canvas.getChildByName(SysDefine.SYS_SCENE_NODE);
-            if (!scene) {
-                scene = new cc.Node(SysDefine.SYS_SCENE_NODE);
-                scene.addComponent(this._sceneComp);
-                scene.parent = canvas;
-            } else {
-                !(scene.getComponent(this._sceneComp)) && scene.addComponent(this._sceneComp);
-            }
-            let UIROOT = this.instance._UIROOT = new cc.Node(SysDefine.SYS_UIROOT_NODE);
-            scene.addChild(UIROOT);
-
-            UIROOT.addChild(this.instance._ndScreen = new cc.Node(SysDefine.SYS_SCREEN_NODE));
-            UIROOT.addChild(this.instance._ndFixed = new cc.Node(SysDefine.SYS_FIXED_NODE));
-            UIROOT.addChild(this.instance._ndPopUp = new cc.Node(SysDefine.SYS_POPUP_NODE));
-            UIROOT.addChild(this.instance._ndToast = new cc.Node(SysDefine.SYS_TOAST_NODE));
-            UIROOT.addChild(this.instance._ndTips = new cc.Node(SysDefine.SYS_TOPTIPS_NODE));
-            cc.director.once(cc.Director.EVENT_BEFORE_SCENE_LAUNCH, () => {
-                this.instance = null;
-            });
         }
         return this.instance;
     }

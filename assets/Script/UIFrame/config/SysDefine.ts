@@ -58,6 +58,7 @@ export class SysDefine {
     public static SYS_TOPTIPS_NODE = "TopTips";
     public static SYS_TOAST_NODE = "Toast";
     public static SYS_MODAL_NODE = "UIModalNode";
+    public static SYS_SOUND_NODE = "Sound";
     /** 规范符号 */
     public static SYS_STANDARD_Prefix = '_';
     public static SYS_STANDARD_Separator = '$';

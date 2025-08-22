@@ -14,5 +14,7 @@ export default class UITestWin_Auto extends Component {
 	btn2: Button | null = null;
 	@property(Button)
 	btn3: Button | null = null;
+	@property(Button)
+	btn4: Button | null = null;
  
 }

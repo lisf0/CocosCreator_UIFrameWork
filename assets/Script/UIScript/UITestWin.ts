@@ -2,6 +2,7 @@
 import { _decorator, log, Texture2D } from 'cc';
 import { ModalOpacity } from '../UIFrame/config/SysDefine';
 import FormMgr from '../UIFrame/FormMgr';
+import SoundMgr from '../UIFrame/SoundMgr';
 import { ModalType } from '../UIFrame/Struct';
 import { UIWindowBase } from '../UIFrame/UIForm';
 import UITestWin_Auto from './AutoScripts/UITestWin_Auto';
@@ -64,6 +65,13 @@ export class UITestWin extends UIWindowBase {
         this.view.btn3.addClick(() => {
             FormMgr.open(UIConfig.UIToast, "test");
         }, this);
+
+        this.view.btn4.addClick(() => {
+            SoundMgr.inst.playEffect("audio/btn_confirm");
+        }, this);
+
+
+
 
 
 
