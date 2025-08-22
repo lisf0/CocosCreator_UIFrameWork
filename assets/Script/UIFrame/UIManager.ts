@@ -41,6 +41,12 @@ export default class UIManager {
             return null;
         }
 
+        if (this.instance) {
+            console.warn(TAG, "UIManager has been initialized, please do not call it again");
+            return;
+        }
+
+
         this.instance = new UIManager();
         let canvas = cc.director.getScene()?.getChildByName("Canvas");
         if (!canvas) return this.instance;
